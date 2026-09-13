@@ -1,7 +1,7 @@
 {
   "name": "liquid-level-gauge-card",
   "version": "0.1.0",
-  "description": "A Lovelace card that shows the liquid level gauge for Home Assistant",
+  "description": "A Lovelace card that shows a liquid fill level for Home Assistant",
   "keywords": [
     "home-assistant",
     "homeassistant",

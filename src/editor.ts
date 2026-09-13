@@ -62,8 +62,8 @@ export class LiquidLevelGaugeCardEditor extends ScopedRegistryHost(LitElement) i
     return this._config?.max_level || '';
   }
 
-  get _hourly_rate_entity(): string {
-    return this._config?.hourly_rate_entity || '';
+  get _secondary_entity(): string {
+    return this._config?.secondary_entity || '';
   }
 
   get _border_colour(): string {
@@ -112,7 +112,7 @@ export class LiquidLevelGaugeCardEditor extends ScopedRegistryHost(LitElement) i
         @input=${this._valueChanged}
       ></mwc-textfield>
       <mwc-textfield
-        label="Fill drop colour (Optional)"
+        label="Fill colour (Optional)"
         .value=${this._fill_drop_colour}
         .configValue=${'fill_drop_colour'}
         @input=${this._valueChanged}
@@ -155,14 +155,14 @@ export class LiquidLevelGaugeCardEditor extends ScopedRegistryHost(LitElement) i
       <mwc-select
         naturalMenuWidth
         fixedMenuPosition
-        label="Hourly Rate Entity (Optional)"
-        .configValue=${'hourly_rate_entity'}
-        .value=${this._hourly_rate_entity}
+        label="Secondary entity (Optional)"
+        .configValue=${'secondary_entity'}
+        .value=${this._secondary_entity}
         @selected=${this._valueChanged}
         @closed=${(ev) => ev.stopPropagation()}
       >
-        ${entities.map((hourly_rate_entity) => {
-          return html`<mwc-list-item .value=${hourly_rate_entity}>${hourly_rate_entity}</mwc-list-item>`;
+        ${entities.map((secondary_entity) => {
+          return html`<mwc-list-item .value=${secondary_entity}>${secondary_entity}</mwc-list-item>`;
         })}
       </mwc-select>
       <mwc-formfield .label=${`Toggle warning ${this._show_warning ? 'off' : 'on'}`}>

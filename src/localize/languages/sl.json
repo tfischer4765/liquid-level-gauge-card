@@ -3,8 +3,6 @@
     "version": "Različica",
     "invalid_configuration": "Neveljavna konfiguracija",
     "show_warning": "Prikaži opozorilo",
-    "show_error": "Prikaži napako",
-    "rate": "Količina",
-    "total": "Skupaj"
+    "show_error": "Prikaži napako"
   }
 }

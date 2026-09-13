@@ -3,8 +3,6 @@
     "version": "Verze",
     "invalid_configuration": "Neplatná konfigurace",
     "show_warning": "Zobrazit varování",
-    "show_error": "Zobrazit chybu",
-    "rate": "Intenzita srážek",
-    "total": "Úhrn srážek"
+    "show_error": "Zobrazit chybu"
   }
 }

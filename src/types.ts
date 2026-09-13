@@ -18,7 +18,7 @@ export interface LiquidLevelGaugeCardConfig extends LovelaceCardConfig {
   language?: string;
   is_imperial?: boolean;
   max_level?: number;
-  hourly_rate_entity?: string;
+  secondary_entity?: string;
   fill_drop_colour?: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;

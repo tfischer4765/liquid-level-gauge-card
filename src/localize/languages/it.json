@@ -3,8 +3,6 @@
     "version": "Versione",
     "invalid_configuration": "Configurazione Invalida",
     "show_warning": "Mostra Avvertimenti",
-    "show_error": "Mostra Errori",
-    "rate": "Intensità",
-    "total": "Totale"
+    "show_error": "Mostra Errori"
   }
 }

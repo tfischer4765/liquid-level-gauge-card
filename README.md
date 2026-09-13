@@ -1,6 +1,6 @@
 # Liquid Level Gauge Card
 
-A Lovelace card that shows the liquid level gauge for [Home Assistant](https://home-assistant.io/).
+A Lovelace card that shows a liquid fill level for [Home Assistant](https://home-assistant.io/).
 
 [![GitHub Release][releases-shield]][releases-link] [![GitHub Release Date][release-date-shield]][releases-link] [![GitHub Releases][latest-download-shield]][traffic-link] [![GitHub Releases][total-download-shield]][traffic-link]
 
@@ -41,7 +41,7 @@ A Lovelace card that shows the liquid level gauge for [Home Assistant](https://h
 
 ```yaml
 type: custom:liquid-level-gauge-card
-entity: sensor.rain_daily
+entity: sensor.cistern_level
 ```
 
 ## Lovelace Examples
@@ -50,7 +50,7 @@ entity: sensor.rain_daily
 
 ```yaml
 type: custom:liquid-level-gauge-card
-entity: sensor.rain_daily
+entity: sensor.cistern_level
 ```
 
 ![Default](https://github.com/tfischer4765/liquid-level-gauge-card/blob/master/docs/images/liquid-level-gauge-card.png?raw=true)
@@ -63,17 +63,55 @@ entity: sensor.rain_daily
 | type              | string  | **Required** | `custom:liquid-level-gauge-card`                                                 |                     |
 | name              | string  | **Optional** | Card name                                                                | `Liquid Level Gauge`        |
 | border_colour     | string  | **Optional** | Change the border colour                                                 | `#000000`           |
-| fill_drop_colour  | string  | **Optional** | Change the drop colour                                                   | `#04ACFF`           |
+| fill_drop_colour  | string  | **Optional** | Change the fill colour                                                   | `#04ACFF`           |
 | show_error        | boolean | **Optional** | Show what an error looks like for the card                               | `false`             |
 | show_warning      | boolean | **Optional** | Show what a warning looks like for the card                              | `false`             |
 | entity            | string  | **Required** | Home Assistant entity ID.                                                | `none`              |
-| max_level         | number  | **Optional** | Override the max level in the drop (will take inches too)                | `40mm`              |
+| max_level         | number  | **Optional** | Value at which the gauge counts as full, read in the displayed unit       | `40`                |
 | language          | string  | **Optional** | The 2 character that determines the language                             | `en`                |
-| is_imperial       | boolean | **Optional** | Switch to inches (`in`) instead of `mm`                                  | `false`             |
-| hourly_rate_entity| string  | **Optional** | Home Assistant entity ID to hourly rate                                  | `none`              |
+| is_imperial       | boolean | **Optional** | Treat the value as inches; forces the displayed unit to `in`             | `false`             |
+| secondary_entity  | string  | **Optional** | Second entity to display; shown with its own name and unit, nothing else | `none`              |
 | tap_action        | object  | **Optional** | Action to take on tap                                                    | `action: more-info` |
 | hold_action       | object  | **Optional** | Action to take on hold                                                   | `none`              |
 | double_tap_action | object  | **Optional** | Action to take on double tap                                             | `none`              |
+
+### Units
+
+The card shows the `unit_of_measurement` reported by the entity, so a level measured
+in `%`, `L`, `m³` or `cm` is labelled correctly without any configuration. Only when
+the entity reports no unit does it fall back to `mm`. Setting `is_imperial` overrides
+this and treats the value as inches.
+
+`max_level` is read in that same displayed unit — with `is_imperial` set, `max_level: 40`
+means 40 inches, not 40 mm.
+
+### The two entities
+
+The card makes exactly one promise: **the gauge always follows `entity`.** Everything
+else is yours to decide.
+
+Both entities are labelled with their own `friendly_name` and printed with their own
+`unit_of_measurement`, verbatim. The card appends nothing, assumes nothing and reads
+no meaning into either of them. `secondary_entity` is displayed and nothing more — it
+has no effect on the fill level.
+
+So a cistern with its pump works:
+
+```yaml
+type: custom:liquid-level-gauge-card
+entity: sensor.cistern_level        # drives the gauge, shown in %
+secondary_entity: sensor.pump_power # just displayed, shown in W
+max_level: 100
+```
+
+…and so does turning the gauge into a crude bar graph for something that is not a
+level at all:
+
+```yaml
+type: custom:liquid-level-gauge-card
+entity: sensor.flow_rate
+max_level: 50
+```
 
 ## Action Options
 
@@ -101,11 +139,15 @@ The following languages are supported:
 | French    | `fr`       | v1.0.0    | [@t1gr0u](https://github.com/t1gr0u)                                                |
 | Italian   | `it`       | v1.4.0    | [@StefanoGiugliano](https://github.com/StefanoGiugliano)                            |
 | German    | `de`       | v1.3.1    | [@AndLindemann](https://github.com/AndLindemann)                                    |
-| Hungarian | `ha`       | v1.3.1    | [@erelke](https://github.com/erelke)                                                |
+| Hungarian | `hu`       | v1.3.1    | [@erelke](https://github.com/erelke)                                                |
 | Portuguese| `pt`       | v1.1.0    | [@ViPeR5000](https://github.com/viper5000)                                          |
 | Slovakia  | `sk`       | v1.4.0    | [@milandzuris](https://github.com/milandzuris)                                      |
 | Slovenian | `sl`       | v1.1.0    | [@mnheia](https://github.com/mnheia)                                                |
 | Swedish   | `sv`       | v1.4.0    | [@tangix](https://github.com/tangix)                                                |
+
+> The two value labels are no longer translated at all — they come from each entity's
+> `friendly_name`, which Home Assistant already localises. Only `version`,
+> `invalid_configuration`, `show_warning` and `show_error` remain translatable.
 
 #### How to add a language
 
@@ -118,7 +160,8 @@ If you wish to add a language please follow these steps:
 
 ## Thanks to
 
-- [@iantrich](https://www.github.com/iantrich) for the [boiler-plate card](https://github.com/custom-cards/boilerplate-card), which got me started
+- [@t1gr0u](https://github.com/t1gr0u) for [rain-gauge-card](https://github.com/t1gr0u/rain-gauge-card), which this card is forked from
+- [@iantrich](https://www.github.com/iantrich) for the [boiler-plate card](https://github.com/custom-cards/boilerplate-card), which got the original started
 
 
 ## Support

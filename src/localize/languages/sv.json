@@ -3,8 +3,6 @@
     "version": "Version",
     "invalid_configuration": "Ogiltig konfiguration",
     "show_warning": "Visa varning",
-    "show_error": "Visa fel",
-    "rate": "Mängd",
-    "total": "Total"
+    "show_error": "Visa fel"
   }
 }

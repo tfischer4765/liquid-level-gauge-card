@@ -28,8 +28,12 @@ console.info(
 (window as any).customCards.push({
   type: 'liquid-level-gauge-card',
   name: 'Liquid Level Gauge Card',
-  description: 'A template custom card for you to create something awesome',
+  description: 'A Lovelace card that shows a liquid fill level',
 });
+
+// Read in the unit the card displays, so `40` means 40 mm by default and 40 in
+// when is_imperial is set.
+const DEFAULT_MAX_LEVEL = 40;
 
 @customElement('liquid-level-gauge-card')
 export class LiquidLevelGaugeCard extends LitElement {
@@ -70,50 +74,84 @@ export class LiquidLevelGaugeCard extends LitElement {
       return false;
     }
 
-    return hasConfigOrEntityChanged(this, changedProps, false);
+    if (hasConfigOrEntityChanged(this, changedProps, false)) {
+      return true;
+    }
+
+    // hasConfigOrEntityChanged only ever looks at config.entity, so a change in
+    // the secondary entity alone would not repaint and its value would sit there
+    // stale until the level happened to move.
+    const oldHass = changedProps.get('hass') as HomeAssistant | undefined;
+    const secondaryEntity = this.config.secondary_entity;
+    if (oldHass && secondaryEntity) {
+      return oldHass.states[secondaryEntity] !== this.hass.states[secondaryEntity];
+    }
+
+    return false;
   }
 
   // https://lit.dev/docs/components/rendering/
   protected render(): TemplateResult | void {
     if (this.config.show_warning) {
-      return this._showWarning(localize('common.show_warning'));
+      return this._showWarning(localize('common.show_warning', '', '', this.config.language));
     }
 
     if (this.config.show_error) {
-      return this._showError(localize('common.show_error'));
+      return this._showError(localize('common.show_error', '', '', this.config.language));
     }
 
     const entityId = this.config.entity;
     const entityState = entityId ? this.hass.states[entityId] : undefined;
     const stateValue: number = entityState ? parseFloat(entityState.state) : 0;
-    let totalRainValue = stateValue;
-    let maxLevelOverride: number = this.config.max_level ? this.config.max_level : 0;
 
-    let maxLevel = 40
+    // States like `unavailable` and `unknown` are normal in Home Assistant, not
+    // exceptions -- parseFloat turns them into NaN, which used to be printed
+    // verbatim. Fall back to an empty gauge and show the raw state instead.
+    const hasValue = Number.isFinite(stateValue);
 
-    let unitOfMeasurement = 'mm'
+    // A level is measured in whatever its sensor reports -- percent, litres,
+    // centimetres. Hard-coded mm/in only ever made sense for a rain gauge, so the
+    // entity's own unit wins; `is_imperial` stays an explicit override.
+    const unitOfMeasurement = this.config.is_imperial
+      ? 'in'
+      : entityState?.attributes?.unit_of_measurement ?? 'mm';
+
+    // Both the value and the maximum are converted together, so `max_level` is
+    // always read in the unit the card displays. A falsy max_level (including 0)
+    // keeps the documented default.
+    let totalLevelValue = hasValue ? stateValue : 0;
+    let maxLevel = this.config.max_level ? Number(this.config.max_level) : DEFAULT_MAX_LEVEL;
     if (this.config.is_imperial) {
-      unitOfMeasurement = 'in'
-      // const totalRainValueConverted = totalRainValue * 25.4
-      // totalRainValue = Math.round((totalRainValueConverted + Number.EPSILON) * 100) / 100
-      totalRainValue = this._inches2mm(totalRainValue);
-      if (maxLevelOverride > 0) {
-        maxLevelOverride = this._inches2mm(maxLevelOverride);
-      }
+      totalLevelValue = this._inches2mm(totalLevelValue);
+      maxLevel = this._inches2mm(maxLevel);
     }
 
-    if (maxLevelOverride) {
-      maxLevel = maxLevelOverride
-    }
+    // Gauge outline: a stadium -- a rectangle capped by a semicircle top and bottom.
+    // Kept inside the original 200x200 viewBox so the card layout does not shift.
+    const gaugeTop = 8
+    const gaugeBottom = 190
+    const gaugeRadius = 55
+    const gaugeCentreX = 68
+    const gaugeLeft = gaugeCentreX - gaugeRadius
+    const gaugeRight = gaugeCentreX + gaugeRadius
+    const gaugeArcTop = gaugeTop + gaugeRadius
+    const gaugeArcBottom = gaugeBottom - gaugeRadius
+    const gaugePath =
+      `M${gaugeLeft},${gaugeArcTop} ` +
+      `A${gaugeRadius},${gaugeRadius} 0 0 1 ${gaugeRight},${gaugeArcTop} ` +
+      `L${gaugeRight},${gaugeArcBottom} ` +
+      `A${gaugeRadius},${gaugeRadius} 0 0 1 ${gaugeLeft},${gaugeArcBottom} Z`
 
-    // 188 min - 0 max
-    const rainDropBoxHeight = 188
-    let rainLevel = rainDropBoxHeight
-    if (totalRainValue > 0 && totalRainValue < maxLevel) {
-      rainLevel = rainDropBoxHeight - Math.round(rainDropBoxHeight / maxLevel * totalRainValue)
+    // gaugeBoxHeight min (empty) - 0 max (full). The fill rect starts at the gauge
+    // top, so translating it by the full height moves it exactly onto the gauge
+    // bottom edge, leaving nothing visible.
+    const gaugeBoxHeight = gaugeBottom - gaugeTop
+    let gaugeLevel = gaugeBoxHeight
+    if (totalLevelValue > 0 && totalLevelValue < maxLevel) {
+      gaugeLevel = gaugeBoxHeight - Math.round(gaugeBoxHeight / maxLevel * totalLevelValue)
     }
-    if (totalRainValue >= maxLevel) {
-      rainLevel = 0
+    if (totalLevelValue >= maxLevel) {
+      gaugeLevel = 0
     }
 
     let borderColour = '#000000'
@@ -126,9 +164,12 @@ export class LiquidLevelGaugeCard extends LitElement {
       fillDropColour = this.config.fill_drop_colour
     }
 
-    const hourlyRateEntityId = this.config.hourly_rate_entity;
-    const hourlyRateEntityState = hourlyRateEntityId ? this.hass.states[hourlyRateEntityId] : undefined;
-    const hourlyRateStateValue:number = hourlyRateEntityState ? parseFloat(hourlyRateEntityState.state) : 0;
+    // The secondary entity carries no meaning for this card: it is read, labelled
+    // with its own friendly name and printed with its own unit, whatever those are.
+    // Nothing is appended and nothing is assumed -- a flow rate, a pump's power
+    // draw and a battery percentage are all equally valid here.
+    const secondaryEntityId = this.config.secondary_entity;
+    const secondaryEntityState = secondaryEntityId ? this.hass.states[secondaryEntityId] : undefined;
 
     return html`
       <ha-card
@@ -147,19 +188,25 @@ export class LiquidLevelGaugeCard extends LitElement {
               <div>
                 <svg version="1.1" id="logo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="80%" viewBox="0 0 200 200">
                   <defs>
-                    <clipPath id="drop">
-                      <path d="M68.2,6.7c0,0-62.4,70.9-62.4,124.7c0,32.3,28,58.4,62.4,58.4s62.4-26.2,62.4-58.4 C130.7,77.6,68.3,6.7,68.2,6.7z"></path>
+                    <clipPath id="gauge">
+                      <path d=${gaugePath}></path>
                     </clipPath>
                   </defs>
 
-                  <g clip-path="url(#drop)">
-                    <g class="fill2">
-                      <rect width="130" height="190" style="fill:${fillDropColour};" transform="translate(0, ${rainLevel})"/>
-                    </g>
+                  <g clip-path="url(#gauge)">
+                    <rect
+                      x=${gaugeLeft}
+                      y=${gaugeTop}
+                      width=${gaugeRadius * 2}
+                      height=${gaugeBoxHeight}
+                      style="fill:${fillDropColour};"
+                      transform="translate(0, ${gaugeLevel})"
+                    />
                   </g>
-                  <g>
-                    <path transform="" class="st0" d="M68.2,6.7c0,0-62.4,70.9-62.4,124.7c0,32.3,28,58.4,62.4,58.4s62.4-26.2,62.4-58.4 C130.7,77.6,68.3,6.7,68.2,6.7z" style="fill:none; stroke:${borderColour}; stroke-width:4; stroke-miterlimit:5;"></path>
-                  </g>
+                  <path
+                    d=${gaugePath}
+                    style="fill:none; stroke:${borderColour}; stroke-width:4; stroke-miterlimit:5;"
+                  ></path>
                 </svg>
               </div>
             </div>
@@ -167,12 +214,12 @@ export class LiquidLevelGaugeCard extends LitElement {
           <div>
             <div>
               <p>
-                <span style="font-weight: bold;">${localize('common.total', '', '', this.config.language)}</span><br/>
-                ${stateValue} ${unitOfMeasurement}
+                <span style="font-weight: bold;">${this._entityLabel(entityState, entityId)}</span><br/>
+                ${hasValue || !entityState ? html`${stateValue || 0} ${unitOfMeasurement}` : entityState.state}
               </p>
             </div>
             <div>
-              ${this._showHourlyRate(hourlyRateEntityState, hourlyRateStateValue, unitOfMeasurement)}
+              ${this._showSecondary(secondaryEntityState, secondaryEntityId)}
             </div>
           </div>
         </div>
@@ -180,11 +227,20 @@ export class LiquidLevelGaugeCard extends LitElement {
     `;
   }
 
-  private _showHourlyRate(hourlyRateEntityState: any | undefined, hourlyRateStateValue: number, unitOfMeasurement: string): TemplateResult | void {
-    if (hourlyRateEntityState === undefined) return
+  // Labels come from the entity, never from this card: the user decides what each
+  // of the two entities means, so a fixed "Level" or "Flow" would only ever be
+  // right by accident.
+  private _entityLabel(entityState: any | undefined, entityId: string | undefined): string {
+    return entityState?.attributes?.friendly_name ?? entityId ?? ''
+  }
+
+  private _showSecondary(entityState: any | undefined, entityId: string | undefined): TemplateResult | void {
+    if (entityState === undefined) return
+    const value = parseFloat(entityState.state)
+    const unit = entityState.attributes?.unit_of_measurement
     return html`<p>
-      <span style="font-weight: bold;">${localize('common.rate', '', '', this.config.language)}</span><br/>
-      ${hourlyRateStateValue} ${unitOfMeasurement}/h
+      <span style="font-weight: bold;">${this._entityLabel(entityState, entityId)}</span><br/>
+      ${Number.isFinite(value) ? html`${value}${unit ? html` ${unit}` : ''}` : entityState.state}
     </p>`
   }
 
