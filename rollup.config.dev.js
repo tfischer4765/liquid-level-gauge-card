@@ -18,7 +18,9 @@ export default {
   },
   plugins: [
     resolve(),
-    typescript(),
+    // See rollup.config.js: the default include pattern no longer matches, so
+    // every .ts file would be filtered out and passed to rollup untranspiled.
+    typescript({ include: ['src/**/*.ts'] }),
     json(),
     babel({
       exclude: 'node_modules/**',

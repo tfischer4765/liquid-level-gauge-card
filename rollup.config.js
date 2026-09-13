@@ -25,7 +25,10 @@ const serveopts = {
 const plugins = [
   nodeResolve({}),
   commonjs(),
-  typescript(),
+  // `include` must be set explicitly: the plugin's default pattern `**/*.ts+(|x)`
+  // is no longer matched by the picomatch version behind @rollup/pluginutils v3,
+  // which silently filters out every .ts file and leaves rollup parsing raw TypeScript.
+  typescript({ include: ['src/**/*.ts'] }),
   json(),
   babel({
     exclude: 'node_modules/**',
