@@ -1,5 +1,5 @@
 {
-    "name": "Rain Gauge Card",
+    "name": "Liquid Level Gauge Card",
     "render_readme": true,
-    "filename": "rain-gauge-card.js"
+    "filename": "liquid-level-gauge-card.js"
 }

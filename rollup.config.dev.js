@@ -10,7 +10,7 @@ import { ignoreSelectFiles } from './elements/ignore/select';
 import { ignoreSwitchFiles } from './elements/ignore/switch';
 
 export default {
-  input: ['src/rain-gauge-card.ts'],
+  input: ['src/liquid-level-gauge-card.ts'],
   output: {
     dir: './dist',
     format: 'es',

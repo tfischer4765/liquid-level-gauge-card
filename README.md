@@ -1,6 +1,6 @@
-# Rain Gauge Card
+# Liquid Level Gauge Card
 
-A Lovelace card that shows the rain gauge for [Home Assistant](https://home-assistant.io/).
+A Lovelace card that shows the liquid level gauge for [Home Assistant](https://home-assistant.io/).
 
 [![GitHub Release][releases-shield]][releases-link] [![GitHub Release Date][release-date-shield]][releases-link] [![GitHub Releases][latest-download-shield]][traffic-link] [![GitHub Releases][total-download-shield]][traffic-link]
 
@@ -16,23 +16,23 @@ A Lovelace card that shows the rain gauge for [Home Assistant](https://home-assi
 
 1. Go to HACS page on your Home Assistant instance
 1. Select `Frontend`
-1. Press add icon and search for `rain-gauge`
-1. Select Rain Gauge Card repo and install
+1. Press add icon and search for `liquid-level-gauge`
+1. Select Liquid Level Gauge Card repo and install
 1. Force refresh the Home Assistant page (<kbd>Ctrl</kbd> + <kbd>F5</kbd>)
-1. Add rain-gauge-card to your page
+1. Add liquid-level-gauge-card to your page
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=t1gr0u&repository=rain-gauge-card&category=plugin)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=tfischer4765&repository=liquid-level-gauge-card&category=plugin)
 
 ### Manual
 
-1. Download the 'rain-gauge-card.js' from the latest [release](https://github.com/t1gr0u/rain-gauge-card/releases) (with right click, save link as)
+1. Download the 'liquid-level-gauge-card.js' from the latest [release](https://github.com/tfischer4765/liquid-level-gauge-card/releases) (with right click, save link as)
 1. Place the downloaded file on your Home Assistant machine in the `config/www` folder (when there is no `www` folder in the folder where your `configuration.yaml` file is, create it and place the file there)
 1. In Home Assistant go to `Configuration->Lovelace Dashboards->Resources` (When there is no `resources` tag on the `Lovelace Dashboard` page, enable advanced mode in your account settings, and retry this step)
 1. Add a new resource
-   1. Url = `/local/rain-gauge-card.js`
+   1. Url = `/local/liquid-level-gauge-card.js`
    1. Resource type = `module`
 1. Force refresh the Home Assistant page (<kbd>Ctrl</kbd> + <kbd>F5</kbd>)
-1. Add rain-gauge-card to your page
+1. Add liquid-level-gauge-card to your page
 
 ## Using the card
 
@@ -40,7 +40,7 @@ A Lovelace card that shows the rain gauge for [Home Assistant](https://home-assi
 - Or add the card manually with the following (minimal) configuration:
 
 ```yaml
-type: custom:rain-gauge-card
+type: custom:liquid-level-gauge-card
 entity: sensor.rain_daily
 ```
 
@@ -49,19 +49,19 @@ entity: sensor.rain_daily
 ### Default
 
 ```yaml
-type: custom:rain-gauge-card
+type: custom:liquid-level-gauge-card
 entity: sensor.rain_daily
 ```
 
-![Default](https://github.com/t1gr0u/rain-gauge-card/blob/master/docs/images/rain-gauge-card.png?raw=true)
+![Default](https://github.com/tfischer4765/liquid-level-gauge-card/blob/master/docs/images/liquid-level-gauge-card.png?raw=true)
 
 
 ## Options
 
 | Name              | Type    | Requirement  | Description                                                              | Default             |
 | ----------------- | ------- | ------------ | ------------------------------------------------------------------------ | ------------------- |
-| type              | string  | **Required** | `custom:rain-gauge-card`                                                 |                     |
-| name              | string  | **Optional** | Card name                                                                | `Rain Gauge`        |
+| type              | string  | **Required** | `custom:liquid-level-gauge-card`                                                 |                     |
+| name              | string  | **Optional** | Card name                                                                | `Liquid Level Gauge`        |
 | border_colour     | string  | **Optional** | Change the border colour                                                 | `#000000`           |
 | fill_drop_colour  | string  | **Optional** | Change the drop colour                                                   | `#04ACFF`           |
 | show_error        | boolean | **Optional** | Show what an error looks like for the card                               | `false`             |
@@ -125,22 +125,22 @@ If you wish to add a language please follow these steps:
 
 Clone and create a PR to help make the card even better.
 
-[releases-shield]: https://img.shields.io/github/release/t1gr0u/rain-gauge-card.svg?style=flat-square
-[releases-link]: https://github.com/t1gr0u/rain-gauge-card/releases/latest
-[release-date-shield]: https://img.shields.io/github/release-date/t1gr0u/rain-gauge-card?style=flat-square
-[latest-download-shield]: https://img.shields.io/github/downloads/t1gr0u/rain-gauge-card/latest/total?style=flat-square&label=downloads%20latest%20release
-[total-download-shield]: https://img.shields.io/github/downloads/t1gr0u/rain-gauge-card/total?style=flat-square&label=total%20views
-[traffic-link]: https://github.com/t1gr0u/rain-gauge-card/graphs/traffic
+[releases-shield]: https://img.shields.io/github/release/tfischer4765/liquid-level-gauge-card.svg?style=flat-square
+[releases-link]: https://github.com/tfischer4765/liquid-level-gauge-card/releases/latest
+[release-date-shield]: https://img.shields.io/github/release-date/tfischer4765/liquid-level-gauge-card?style=flat-square
+[latest-download-shield]: https://img.shields.io/github/downloads/tfischer4765/liquid-level-gauge-card/latest/total?style=flat-square&label=downloads%20latest%20release
+[total-download-shield]: https://img.shields.io/github/downloads/tfischer4765/liquid-level-gauge-card/total?style=flat-square&label=total%20views
+[traffic-link]: https://github.com/tfischer4765/liquid-level-gauge-card/graphs/traffic
 [hacs-shield]: https://img.shields.io/badge/HACS-Default-orange.svg?style=flat-square
 [hacs-link]: https://github.com/custom-components/hacs
 [home-assistant-shield]: https://img.shields.io/badge/Home%20Assistant-visual%20editor/yaml-green?style=flat-square
 [home-assistant-link]: https://www.home-assistant.io/
-[license-shield]: https://img.shields.io/github/license/custom-cards/boilerplate-card.svg?style=flat-square
+[license-shield]: https://img.shields.io/github/license/tfischer4765/liquid-level-gauge-card.svg?style=flat-square
 [license-link]: LICENSE.md
-[activity-shield]: https://img.shields.io/github/commit-activity/y/t1gr0u/rain-gauge-card.svg?style=flat-square
-[activity-link]: https://github.com/t1gr0u/rain-gauge-card/commits/master
-[bugs-shield]: https://img.shields.io/github/issues/t1gr0u/rain-gauge-card/bug?color=red&style=flat-square&label=bugs
-[bugs-link]: https://github.com/t1gr0u/rain-gauge-card/labels/bug
-[enhancements-shield]: https://img.shields.io/github/issues/t1gr0u/rain-gauge-card/enhancement?color=blue&style=flat-square&label=enhancements
-[enhancement-link]: https://github.com/t1gr0u/rain-gauge-card/labels/enhancement
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2023.svg?style=flat-square
+[activity-shield]: https://img.shields.io/github/commit-activity/y/tfischer4765/liquid-level-gauge-card.svg?style=flat-square
+[activity-link]: https://github.com/tfischer4765/liquid-level-gauge-card/commits/master
+[bugs-shield]: https://img.shields.io/github/issues/tfischer4765/liquid-level-gauge-card/bug?color=red&style=flat-square&label=bugs
+[bugs-link]: https://github.com/tfischer4765/liquid-level-gauge-card/labels/bug
+[enhancements-shield]: https://img.shields.io/github/issues/tfischer4765/liquid-level-gauge-card/enhancement?color=blue&style=flat-square&label=enhancements
+[enhancement-link]: https://github.com/tfischer4765/liquid-level-gauge-card/labels/enhancement
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2026.svg?style=flat-square

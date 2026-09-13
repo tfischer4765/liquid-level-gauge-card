@@ -162,15 +162,15 @@ class ActionHandler extends HTMLElement implements ActionHandler {
   }
 }
 
-customElements.define('action-handler-rain-gauge', ActionHandler);
+customElements.define('action-handler-liquid-level-gauge', ActionHandler);
 
 const getActionHandler = (): ActionHandler => {
   const body = document.body;
-  if (body.querySelector('action-handler-rain-gauge')) {
-    return body.querySelector('action-handler-rain-gauge') as ActionHandler;
+  if (body.querySelector('action-handler-liquid-level-gauge')) {
+    return body.querySelector('action-handler-liquid-level-gauge') as ActionHandler;
   }
 
-  const actionhandler = document.createElement('action-handler-rain-gauge');
+  const actionhandler = document.createElement('action-handler-liquid-level-gauge');
   body.appendChild(actionhandler);
 
   return actionhandler as ActionHandler;

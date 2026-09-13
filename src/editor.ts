@@ -3,7 +3,7 @@ import { LitElement, html, TemplateResult, css, CSSResultGroup } from 'lit';
 import { HomeAssistant, fireEvent, LovelaceCardEditor } from 'custom-card-helpers';
 
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
-import { RainGaugeCardConfig } from './types';
+import { LiquidLevelGaugeCardConfig } from './types';
 import { customElement, property, state } from 'lit/decorators';
 import { formfieldDefinition } from '../elements/formfield';
 import { selectDefinition } from '../elements/select';
@@ -11,11 +11,11 @@ import { switchDefinition } from '../elements/switch';
 import { textfieldDefinition } from '../elements/textfield';
 import { CARD_LANGUAGES } from './localize/localize';
 
-@customElement('rain-gauge-card-editor')
-export class RainGaugeCardEditor extends ScopedRegistryHost(LitElement) implements LovelaceCardEditor {
+@customElement('liquid-level-gauge-card-editor')
+export class LiquidLevelGaugeCardEditor extends ScopedRegistryHost(LitElement) implements LovelaceCardEditor {
   @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @state() private _config?: RainGaugeCardConfig;
+  @state() private _config?: LiquidLevelGaugeCardConfig;
 
   @state() private _helpers?: any;
 
@@ -28,7 +28,7 @@ export class RainGaugeCardEditor extends ScopedRegistryHost(LitElement) implemen
     ...formfieldDefinition,
   };
 
-  public setConfig(config: RainGaugeCardConfig): void {
+  public setConfig(config: LiquidLevelGaugeCardConfig): void {
     this._config = config;
 
     this.loadCardHelpers();

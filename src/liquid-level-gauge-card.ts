@@ -11,14 +11,14 @@ import {
   getLovelace,
 } from 'custom-card-helpers'; // This is a community maintained npm module with common helper functions/types. https://github.com/custom-cards/custom-card-helpers
 
-import type { RainGaugeCardConfig } from './types';
+import type { LiquidLevelGaugeCardConfig } from './types';
 import { actionHandler } from './action-handler-directive';
 import { CARD_VERSION } from './const';
 import { localize } from './localize/localize';
 
 /* eslint no-console: 0 */
 console.info(
-  `%c  RAIN-GAUGE-CARD \n%c  ${localize('common.version')} ${CARD_VERSION}    `,
+  `%c  LIQUID-LEVEL-GAUGE-CARD \n%c  ${localize('common.version')} ${CARD_VERSION}    `,
   'color: orange; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray',
 );
@@ -26,16 +26,16 @@ console.info(
 // This puts your card into the UI card picker dialog
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: 'rain-gauge-card',
-  name: 'Rain Gauge Card',
+  type: 'liquid-level-gauge-card',
+  name: 'Liquid Level Gauge Card',
   description: 'A template custom card for you to create something awesome',
 });
 
-@customElement('rain-gauge-card')
-export class RainGaugeCard extends LitElement {
+@customElement('liquid-level-gauge-card')
+export class LiquidLevelGaugeCard extends LitElement {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
     await import('./editor');
-    return document.createElement('rain-gauge-card-editor');
+    return document.createElement('liquid-level-gauge-card-editor');
   }
 
   public static getStubConfig(): Record<string, unknown> {
@@ -46,10 +46,10 @@ export class RainGaugeCard extends LitElement {
   // https://lit.dev/docs/components/properties/
   @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @state() private config!: RainGaugeCardConfig;
+  @state() private config!: LiquidLevelGaugeCardConfig;
 
   // https://lit.dev/docs/components/properties/#accessors-custom
-  public setConfig(config: RainGaugeCardConfig): void {
+  public setConfig(config: LiquidLevelGaugeCardConfig): void {
     if (!config) {
       throw new Error(localize('common.invalid_configuration'));
     }
@@ -59,7 +59,7 @@ export class RainGaugeCard extends LitElement {
     }
 
     this.config = {
-      name: 'Rain Gauge',
+      name: 'Liquid Level Gauge',
       ...config,
     };
   }
@@ -139,7 +139,7 @@ export class RainGaugeCard extends LitElement {
           hasDoubleClick: hasAction(this.config.double_tap_action),
         })}
         tabindex="0"
-        .label=${`Rain Gauge: ${this.config.entity || 'No Entity Defined'}`}
+        .label=${`Liquid Level Gauge: ${this.config.entity || 'No Entity Defined'}`}
       >
         <div style="display: flex;">
           <div style="width: 50%; padding-left: 30px;">
