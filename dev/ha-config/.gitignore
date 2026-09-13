@@ -1,0 +1,6 @@
+# Home Assistant writes its whole runtime state into this directory (.storage,
+# home-assistant_v2.db, logs, secrets). Track only the two files we author.
+*
+!.gitignore
+!configuration.yaml
+!ui-lovelace.yaml

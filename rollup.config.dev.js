@@ -29,7 +29,9 @@ export default {
     serve({
       contentBase: './dist',
       host: '0.0.0.0',
-      port: 5000,
+      // Not 5000: macOS binds that port to the AirPlay Receiver (ControlCenter)
+      // by default, so the dev server would fail to start with "port in use".
+      port: 5001,
       allowCrossOrigin: true,
       headers: {
         'Access-Control-Allow-Origin': '*',

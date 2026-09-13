@@ -1,0 +1,44 @@
+# Test dashboard. Resources are declared in configuration.yaml under `lovelace:`
+# (the legacy `resources:` block in this file is deprecated in YAML mode).
+
+views:
+  - title: Liquid Level Gauge
+    path: liquid-level-gauge
+    cards:
+      # The sliders that drive the card. Drag these and watch the fill react.
+      - type: entities
+        title: Test controls
+        entities:
+          - input_number.tank_level
+          - input_number.tank_flow_rate
+
+      # Minimal configuration.
+      - type: custom:liquid-level-gauge-card
+        entity: input_number.tank_level
+        max_level: 100
+
+      # Everything wired up: flow rate, custom colours, explicit name.
+      - type: custom:liquid-level-gauge-card
+        name: Cistern
+        entity: input_number.tank_level
+        secondary_entity: input_number.tank_flow_rate
+        max_level: 100
+        fill_drop_colour: '#04ACFF'
+        border_colour: '#1B4965'
+
+      # Edge cases worth eyeballing on every change.
+      - type: custom:liquid-level-gauge-card
+        name: Empty (0)
+        entity: input_number.tank_flow_rate
+        max_level: 100
+
+      - type: custom:liquid-level-gauge-card
+        name: Overfull (level > max)
+        entity: input_number.tank_level
+        max_level: 10
+
+      - type: custom:liquid-level-gauge-card
+        name: German locale
+        entity: input_number.tank_level
+        max_level: 100
+        language: de

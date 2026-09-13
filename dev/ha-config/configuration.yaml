@@ -1,0 +1,51 @@
+# Home Assistant test instance for liquid-level-gauge-card development.
+#
+# NOTE: `default_config:` is deliberately absent. It is a meta-integration that
+# pulls in ssdp, zeroconf, dhcp, usb, bluetooth and cloud -- i.e. it would make
+# this throwaway instance browse the LAN, discover real devices and advertise
+# itself over mDNS. Everything below is named explicitly so this instance talks
+# to nothing but the browser in front of it.
+
+homeassistant:
+  name: Liquid Level Gauge Card Test
+  unit_system: metric
+  temperature_unit: C
+  time_zone: Europe/Berlin
+  country: DE
+  currency: EUR
+
+frontend:
+
+# No `http:` block on purpose. The defaults (0.0.0.0:8123 inside the container)
+# are already what the port mapping expects, and an explicit http config is
+# treated by HA as "pending" -- it gets rolled back with a restart if no client
+# confirms it within five minutes, which just makes the container flap.
+
+lovelace:
+  mode: yaml
+  # The browser -- not Home Assistant -- fetches this URL, so 127.0.0.1 resolves
+  # to the Mac running `npm start`. The rollup dev server sends
+  # Access-Control-Allow-Origin: *, which is what makes the cross-port load work.
+  resources:
+    - url: http://127.0.0.1:5001/liquid-level-gauge-card.js
+      type: module
+
+# Fake entities to drive the card with. input_number renders as a slider in the
+# UI, so the level can be dragged from 0 to 100 and the fill watched live --
+# no real sensor, no integration, no network traffic.
+input_number:
+  tank_level:
+    name: Tank Level
+    min: 0
+    max: 100
+    step: 1
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+
+  tank_flow_rate:
+    name: Tank Flow Rate
+    min: 0
+    max: 20
+    step: 0.1
+    unit_of_measurement: 'L/h'
+    icon: mdi:water-pump

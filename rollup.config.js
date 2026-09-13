@@ -15,7 +15,8 @@ const dev = process.env.ROLLUP_WATCH;
 const serveopts = {
   contentBase: ['./dist'],
   host: '0.0.0.0',
-  port: 5000,
+  // See rollup.config.dev.js: port 5000 is taken by macOS AirPlay Receiver.
+  port: 5001,
   allowCrossOrigin: true,
   headers: {
     'Access-Control-Allow-Origin': '*',

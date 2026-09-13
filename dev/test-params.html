@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>liquid-level-gauge-card parameter matrix</title>
+    <style>
+      body { font: 13px -apple-system, sans-serif; background: #f4f4f4; margin: 0; padding: 16px; }
+      .grid { display: grid; grid-template-columns: repeat(4, 300px); gap: 12px; }
+      .case { background: #fff; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; }
+      .case > h3 { margin: 0; padding: 6px 8px; background: #222; color: #fff; font-size: 12px; font-weight: 600; }
+      .case > .expect { padding: 4px 8px; font-size: 11px; color: #555; border-bottom: 1px solid #eee; }
+      /* Stub of HA's ha-card so the card has something to live in. */
+      ha-card { display: block; padding: 8px; }
+      ha-card .hdr { font-weight: 700; font-size: 15px; padding: 4px 0 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="grid" id="grid"></div>
+
+    <script type="module" src="/liquid-level-gauge-card.js"></script>
+    <script type="module">
+      // --- Minimal stubs for the Home Assistant elements the card renders into ---
+      // Must use shadow DOM + <slot>: the card renders its content as ha-card's
+      // LIGHT DOM children, so a stub that touches innerHTML would delete them.
+      class HaCard extends HTMLElement {
+        constructor() {
+          super();
+          this.attachShadow({ mode: 'open' }).innerHTML =
+            '<style>.hdr{font-weight:700;font-size:15px;padding:4px 0 8px}</style>' +
+            '<div class="hdr"></div><slot></slot>';
+        }
+        set header(v) { this._h = v; this._paint(); }
+        connectedCallback() { this._paint(); }
+        _paint() { this.shadowRoot.querySelector('.hdr').textContent = this._h ?? ''; }
+      }
+      customElements.define('ha-card', HaCard);
+
+      class HuiWarning extends HTMLElement {
+        connectedCallback() { this.style.cssText = 'display:block;padding:8px;background:#fff3cd;color:#856404'; }
+      }
+      customElements.define('hui-warning', HuiWarning);
+
+      class HuiErrorCard extends HTMLElement {
+        setConfig(c) { this._c = c; }
+        connectedCallback() {
+          this.style.cssText = 'display:block;padding:8px;background:#f8d7da;color:#721c24';
+          this.textContent = 'ERROR CARD: ' + (this._c ? this._c.error : '');
+        }
+      }
+      customElements.define('hui-error-card', HuiErrorCard);
+
+      // --- Fake hass ---
+      const hass = {
+        states: {
+          'sensor.tank':        { entity_id: 'sensor.tank',        state: '20',          attributes: { friendly_name: 'Cistern Level' } },
+          'sensor.flow':        { entity_id: 'sensor.flow',        state: '3.5',         attributes: { friendly_name: 'Cistern Level' } },
+          'sensor.unavailable': { entity_id: 'sensor.unavailable', state: 'unavailable', attributes: { friendly_name: 'Cistern Level' } },
+          'sensor.percent':     { entity_id: 'sensor.percent',     state: '75',          attributes: { unit_of_measurement: '%', friendly_name: 'Cistern Level' } },
+          'sensor.pump':        { entity_id: 'sensor.pump',        state: '450',         attributes: { unit_of_measurement: 'W', friendly_name: 'Pump Power' } },
+          'sensor.nounit':      { entity_id: 'sensor.nounit',      state: '7',           attributes: { friendly_name: 'Bare Number' } },
+          'sensor.unknown':     { entity_id: 'sensor.unknown',     state: 'unknown',     attributes: { friendly_name: 'Cistern Level' } },
+          'sensor.flowlh':      { entity_id: 'sensor.flowlh',      state: '12',          attributes: { unit_of_measurement: 'L/h' } },
+          'sensor.negative':    { entity_id: 'sensor.negative',    state: '-5',          attributes: { friendly_name: 'Cistern Level' } },
+        },
+        localize: (k) => k,
+        language: 'en',
+        callService: () => {},
+      };
+
+      const cases = [
+        ['minimal (entity, default max_level 40)', 'Wert 20 von 40 -> halb voll', { entity: 'sensor.tank' }],
+        ['name', 'Kopfzeile "Zisterne"', { entity: 'sensor.tank', name: 'Zisterne' }],
+        ['border_colour', 'Kontur rot', { entity: 'sensor.tank', border_colour: '#cc0000' }],
+        ['fill_drop_colour', 'Fuellung gruen', { entity: 'sensor.tank', fill_drop_colour: '#22aa55' }],
+        ['max_level: 40 (Zahl)', '20/40 -> halb', { entity: 'sensor.tank', max_level: 40 }],
+        ['max_level: "40" (String, wie Editor)', '20/40 -> halb, wie oben', { entity: 'sensor.tank', max_level: '40' }],
+        ['max_level: 10 (Wert > max)', 'randvoll', { entity: 'sensor.tank', max_level: 10 }],
+        ['is_imperial', 'Einheit in, 20in=508mm > 40 -> voll', { entity: 'sensor.tank', is_imperial: true }],
+        ['is_imperial + max_level 40', '508mm / 1016mm -> halb', { entity: 'sensor.tank', is_imperial: true, max_level: 40 }],
+        ['secondary_entity', 'zweiter Block Rate 3.5 mm/h', { entity: 'sensor.tank', secondary_entity: 'sensor.flow' }],
+        ['language: de', 'Gesamt / Intensitaet', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'de' }],
+        ['language: cs', 'Uhrn srazek / Intenzita srazek', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'cs' }],
+        ['language: da (NICHT registriert)', 'Fallback en erwartet', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'da' }],
+        ['language: hu (NICHT registriert)', 'Fallback en erwartet', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'hu' }],
+        ['language: xx (unbekannt)', 'Fallback en erwartet', { entity: 'sensor.tank', language: 'xx' }],
+        ['show_warning', 'gelbe Warnung', { entity: 'sensor.tank', show_warning: true }],
+        ['show_error', 'rote Fehlerkarte', { entity: 'sensor.tank', show_error: true }],
+        ['ohne entity', 'kein Absturz, Wert 0', {}],
+        ['entity unavailable', 'kein Absturz, NaN?', { entity: 'sensor.unavailable' }],
+        ['show_warning + language de', 'erwartet "Warnung anzeigen"', { entity: 'sensor.tank', show_warning: true, language: 'de' }],
+        ['show_error + language de', 'erwartet "Fehler anzeigen"', { entity: 'sensor.tank', show_error: true, language: 'de' }],
+        ['Entity mit unit_of_measurement %', 'erwartet %, nicht mm', { entity: 'sensor.percent' }],
+        ['Entity-State "unknown"', 'kein NaN erwartet', { entity: 'sensor.unknown' }],
+        ['negativer Wert', 'leer erwartet', { entity: 'sensor.negative' }],
+        ['max_level: 0', 'Division durch 0?', { entity: 'sensor.tank', max_level: 0 }],
+        ['Flow-Entity mit eigener Einheit L/h', 'erwartet L/h, nicht %/h', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.flowlh' }],
+        ['Pumpenleistung als 2. Entity', 'Cistern Level 75 % / Pump Power 450 W', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.pump' }],
+        ['2. Entity ohne Einheit', 'nur die Zahl, nichts angehaengt', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.nounit' }],
+        ['tap/hold/double_tap', 'rendert normal', {
+          entity: 'sensor.tank',
+          tap_action: { action: 'more-info' },
+          hold_action: { action: 'none' },
+          double_tap_action: { action: 'none' },
+        }],
+      ];
+
+      await customElements.whenDefined('liquid-level-gauge-card');
+      const grid = document.getElementById('grid');
+      const results = [];
+
+      for (const [title, expect, config] of cases) {
+        const box = document.createElement('div');
+        box.className = 'case';
+        box.innerHTML = `<h3></h3><div class="expect"></div>`;
+        box.querySelector('h3').textContent = title;
+        box.querySelector('.expect').textContent = expect;
+        grid.appendChild(box);
+
+        try {
+          const el = document.createElement('liquid-level-gauge-card');
+          el.setConfig({ type: 'custom:liquid-level-gauge-card', ...config });
+          el.hass = hass;
+          box.appendChild(el);
+          await el.updateComplete;
+          const txt = (el.shadowRoot?.textContent || '').replace(/\s+/g, ' ').trim();
+          const rect = el.shadowRoot?.querySelector('rect');
+          results.push({
+            case: title,
+            ok: true,
+            text: txt,
+            translate: rect?.getAttribute('transform') ?? null,
+            fill: rect?.getAttribute('style') ?? null,
+          });
+        } catch (e) {
+          box.insertAdjacentHTML('beforeend', `<div style="padding:8px;background:#f8d7da">THREW: ${e.message}</div>`);
+          results.push({ case: title, ok: false, error: e.message });
+        }
+      }
+
+
+      // --- Reaktivitaetstest: aendert sich nur die Rate-Entity, rendert die Karte neu? ---
+      {
+        const el = document.createElement("liquid-level-gauge-card");
+        el.setConfig({ type: "custom:liquid-level-gauge-card", entity: "sensor.tank", secondary_entity: "sensor.flow" });
+        el.hass = { ...hass, states: { ...hass.states } };
+        document.body.appendChild(el);
+        await el.updateComplete;
+        const before = (el.shadowRoot?.textContent || "").replace(/\s+/g, " ").trim();
+
+        // Nur die Rate-Entity aendert sich, neues states-Objekt wie in echtem HA
+        el.hass = { ...hass, states: { ...hass.states,
+          "sensor.flow": { entity_id: "sensor.flow", state: "99", attributes: { friendly_name: 'Cistern Level' } } } };
+        await el.updateComplete;
+        const afterRateOnly = (el.shadowRoot?.textContent || "").replace(/\s+/g, " ").trim();
+
+        // Jetzt aendert sich zusaetzlich die Haupt-Entity
+        el.hass = { ...hass, states: { ...hass.states,
+          "sensor.flow": { entity_id: "sensor.flow", state: "99", attributes: { friendly_name: 'Cistern Level' } },
+          "sensor.tank": { entity_id: "sensor.tank", state: "21", attributes: { friendly_name: 'Cistern Level' } } } };
+        await el.updateComplete;
+        const afterBoth = (el.shadowRoot?.textContent || "").replace(/\s+/g, " ").trim();
+
+        results.push({ case: "REAKTIVITAET", ok: true,
+          text: "vorher=[" + before + "] nurRate=[" + afterRateOnly + "] beide=[" + afterBoth + "]",
+          translate: null, fill: null });
+      }
+
+      window.__RESULTS__ = results;
+      const pre = document.createElement('pre');
+      pre.id = 'results';
+      pre.style.cssText = 'display:none';
+      pre.textContent = JSON.stringify(results, null, 1);
+      document.body.appendChild(pre);
+      document.title = 'DONE';
+    </script>
+  </body>
+</html>

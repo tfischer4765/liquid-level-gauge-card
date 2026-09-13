@@ -1,0 +1,26 @@
+# Test instance for liquid-level-gauge-card. Deliberately isolated from the LAN:
+# see dev/README.md for the reasoning behind every hardening choice here.
+
+services:
+  homeassistant:
+    image: homeassistant/home-assistant:stable
+    container_name: liquid-level-gauge-card-test
+
+    # Loopback-only binding: the test instance is reachable from this Mac's
+    # browser and from nowhere else. Port 8124 so it can never be confused
+    # with a productive instance on the default 8123.
+    ports:
+      - '127.0.0.1:8124:8123'
+
+    # Default bridge networking. NOT network_mode: host -- host mode is what the
+    # HA docs recommend *for device discovery*, which is precisely what this
+    # instance must not do.
+    volumes:
+      - ./ha-config:/config
+
+    environment:
+      - TZ=Europe/Berlin
+
+    # No restart policy: this is a throwaway test rig, it should not come back
+    # on its own after a reboot.
+    restart: 'no'
