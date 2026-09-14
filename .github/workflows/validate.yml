@@ -1,7 +1,14 @@
 name: Validate
 
+# Most of what this validates is repository state (description, topics, issues
+# enabled) rather than code, which is why the nightly run exists: the repo can
+# go from valid to invalid without a single commit. Feature branches are not
+# checked -- they have no release of their own, so a plugin structure check on
+# them only ever produces noise.
 on:
   push:
+    branches:
+      - master
   pull_request:
   schedule:
     - cron: "0 0 * * *"
@@ -11,7 +18,7 @@ jobs:
   validate-hacs:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v2"
+      - uses: "actions/checkout@v7"
       - name: HACS validation
         uses: "hacs/action@main"
         with:

@@ -1,30 +1,63 @@
 name: Release
 
+# Triggered by the git tag, not by GitHub's release table. That way the tag
+# always exists first and the build runs before anything becomes visible.
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   release:
-    name: Prepare release
+    name: Build and publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v7
+        with:
+          # Needed so the annotated tag object (and its message) is available
+          # to the release notes step below.
+          fetch-depth: 0
 
-      # Build
-      - name: Build the file
+      - name: Build the bundle
         run: |
-          cd /home/runner/work/liquid-level-gauge-card/liquid-level-gauge-card
           npm install
           npm run build
 
-      # Upload build file to the releas as an asset.
-      - name: Upload zip to release
-        uses: svenstaro/upload-release-action@v1-release
+      # Draft first: a draft release is invisible over the API, so HACS can
+      # never see a release whose asset has not been uploaded yet. If the build
+      # above failed we never get here and no release is created at all.
+      #
+      # --verify-tag keeps the direction right: without it gh would create a
+      # missing tag from --target, letting GitHub write into the ref database.
+      - name: Create draft release with the bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          # 0.x is not a release by convention -- mark it as a pre-release so
+          # HACS only offers it to users who enabled the beta switch.
+          FLAGS=""
+          case "$TAG" in
+            v0.*) FLAGS="--prerelease" ;;
+          esac
 
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: /home/runner/work/liquid-level-gauge-card/liquid-level-gauge-card/dist/liquid-level-gauge-card.js
-          asset_name: liquid-level-gauge-card.js
-          tag: ${{ github.ref }}
-          overwrite: true
+          # Hand-written notes live in the annotated tag, i.e. in the object
+          # database; --generate-notes appends the commit listing below them.
+          gh release create "$TAG" \
+            --draft \
+            --verify-tag \
+            $FLAGS \
+            --title "$TAG" \
+            --notes "$(git tag -l --format='%(contents)' "$TAG")" \
+            --generate-notes \
+            'dist/liquid-level-gauge-card.js#Lovelace card bundle'
+
+      # Only now does the release become visible, asset included.
+      - name: Promote the draft to published
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release edit "$TAG" --draft=false

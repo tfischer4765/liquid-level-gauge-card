@@ -158,6 +158,32 @@ If you wish to add a language please follow these steps:
 * Then modify the `localize.ts` file, located in `src/localize/` to include your language file.
 * Update the `Readme.md`, found in `src/` to include your language and your Github username in the language table.
 
+## Releasing
+
+The built bundle is not committed — `dist/` stays ignored, and HACS resolves the
+card through GitHub releases. Cutting one is a tag push:
+
+```bash
+git tag -a v0.1.0 -m "What changed in this version"
+git push origin v0.1.0
+```
+
+The release workflow takes it from there: it builds, creates the release as a
+**draft** with `liquid-level-gauge-card.js` attached, and only then promotes it to
+published. A failing build therefore leaves no release behind at all, rather than a
+published one whose asset never arrived.
+
+Two conventions are enforced by that workflow:
+
+- **`v0.*` is published as a pre-release**, so HACS only offers it to users who
+  enabled the beta switch. Drop the `0.` prefix when the card is ready to be a real
+  release.
+- **The tag's annotation becomes the release notes**, with the generated commit
+  listing appended below it. Write the changelog in `git tag -a`, not in the web UI.
+
+Keep `CARD_VERSION` in `src/const.ts` and `version` in `package.json` in sync with
+the tag — nothing checks this, and the card logs its version to the browser console.
+
 ## Thanks to
 
 - [@t1gr0u](https://github.com/t1gr0u) for [rain-gauge-card](https://github.com/t1gr0u/rain-gauge-card), which this card is forked from
