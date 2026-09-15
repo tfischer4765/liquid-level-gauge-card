@@ -211,6 +211,46 @@
         }
       }
 
+
+      // --- getConfigForm ----------------------------------------------------
+      // Home Assistant renders this form, so the harness cannot check how it
+      // looks. What it CAN check is that the schema is well formed and that every
+      // field name is a config key the card actually reads -- a typo there would
+      // silently produce a control writing a key nothing consumes.
+      {
+        const KNOWN_KEYS = [
+          'entity', 'name', 'max_level', 'aspect_ratio', 'secondary_entity',
+          'fill_drop_colour', 'border_colour', 'is_imperial', 'language',
+          'show_warning', 'show_error',
+        ];
+
+        const Card = customElements.get('liquid-level-gauge-card');
+        const form = Card.getConfigForm();
+
+        const flatten = (schema) =>
+          schema.flatMap((e) => (e.schema ? flatten(e.schema) : [e]));
+        const fields = flatten(form.schema);
+        const names = fields.map((f) => f.name);
+
+        const unknown = names.filter((n) => !KNOWN_KEYS.includes(n));
+        const missing = KNOWN_KEYS.filter((k) => !names.includes(k));
+        const noSelector = fields.filter((f) => !f.selector && !f.type).map((f) => f.name);
+        const noLabel = names.filter((n) => !form.computeLabel({ name: n }));
+        const dupes = names.filter((n, i) => names.indexOf(n) !== i);
+
+        results.push({
+          case: 'FORM', ok: true, translate: null, fill: null,
+          text:
+            'Felder=' + names.length +
+            ' | unbekannte Keys=[' + unknown.join(',') + ']' +
+            ' | fehlende Keys=[' + missing.join(',') + ']' +
+            ' | doppelt=[' + dupes.join(',') + ']' +
+            ' | ohne Selector=[' + noSelector.join(',') + ']' +
+            ' | ohne Label=[' + noLabel.join(',') + ']' +
+            ' | entity required=' + !!fields.find((f) => f.name === 'entity')?.required,
+        });
+      }
+
       window.__RESULTS__ = results;
       const pre = document.createElement('pre');
       pre.id = 'results';

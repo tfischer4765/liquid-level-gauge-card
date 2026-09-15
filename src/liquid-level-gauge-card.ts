@@ -7,14 +7,13 @@ import {
   hasAction,
   ActionHandlerEvent,
   handleAction,
-  LovelaceCardEditor,
   getLovelace,
 } from 'custom-card-helpers'; // This is a community maintained npm module with common helper functions/types. https://github.com/custom-cards/custom-card-helpers
 
 import type { LiquidLevelGaugeCardConfig } from './types';
 import { actionHandler } from './action-handler-directive';
 import { CARD_VERSION } from './const';
-import { localize } from './localize/localize';
+import { localize, CARD_LANGUAGES } from './localize/localize';
 
 /* eslint no-console: 0 */
 console.info(
@@ -47,11 +46,83 @@ const DEFAULT_ASPECT_RATIO = 2;
 const MIN_ASPECT_RATIO = 1;
 const MAX_ASPECT_RATIO = 10;
 
+// Labels and help texts for the visual editor. Kept next to the schema rather
+// than in the translation files: getConfigForm is static and never sees `hass`,
+// so none of this can be localised anyway.
+const EDITOR_LABELS: Record<string, string> = {
+  entity: 'Entity (drives the gauge)',
+  name: 'Card name',
+  max_level: 'Value at which the gauge is full',
+  aspect_ratio: 'Shape, height : width',
+  secondary_entity: 'Secondary entity (display only)',
+  fill_drop_colour: 'Fill colour',
+  border_colour: 'Outline colour',
+  is_imperial: 'Treat the value as inches',
+  language: 'Language',
+  show_warning: 'Show the warning placeholder',
+  show_error: 'Show the error placeholder',
+};
+
+const EDITOR_HELPERS: Record<string, string> = {
+  entity: 'The one thing this card promises: the gauge always follows this entity.',
+  max_level: 'Read in the unit the card displays. Defaults to 40.',
+  aspect_ratio: '1 is a circle, 10 a slim sight glass.',
+  secondary_entity: 'Shown with its own name and unit. Has no effect on the gauge.',
+  fill_drop_colour: 'Any CSS colour. Leave empty for the default blue.',
+  border_colour: 'Any CSS colour. Leave empty to follow the active theme.',
+  is_imperial: 'Converts the value from inches and forces the displayed unit to "in".',
+};
+
 @customElement('liquid-level-gauge-card')
 export class LiquidLevelGaugeCard extends LitElement {
-  public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import('./editor');
-    return document.createElement('liquid-level-gauge-card-editor');
+  // Home Assistant renders this form itself (2026.6 and later), which is why the
+  // card ships no editor element of its own: no hand-rolled entity list, no
+  // Material components, and the controls match whatever theme is active.
+  // Note that this is static and never sees `hass`, so the labels below cannot
+  // be localised -- they could not be in the old editor either.
+  public static getConfigForm(): Record<string, unknown> {
+    return {
+      schema: [
+        { name: 'entity', required: true, selector: { entity: {} } },
+        { name: 'name', selector: { text: {} } },
+        {
+          type: 'grid',
+          schema: [
+            { name: 'max_level', selector: { number: { min: 0, step: 'any', mode: 'box' } } },
+            {
+              name: 'aspect_ratio',
+              selector: {
+                number: { min: MIN_ASPECT_RATIO, max: MAX_ASPECT_RATIO, step: 0.1, mode: 'slider' },
+              },
+            },
+          ],
+        },
+        { name: 'secondary_entity', selector: { entity: {} } },
+        {
+          type: 'expandable',
+          title: 'Appearance',
+          schema: [
+            { name: 'fill_drop_colour', selector: { text: {} } },
+            { name: 'border_colour', selector: { text: {} } },
+          ],
+        },
+        {
+          type: 'expandable',
+          title: 'Advanced',
+          schema: [
+            { name: 'is_imperial', selector: { boolean: {} } },
+            {
+              name: 'language',
+              selector: { select: { mode: 'dropdown', options: CARD_LANGUAGES.filter(Boolean) } },
+            },
+            { name: 'show_warning', selector: { boolean: {} } },
+            { name: 'show_error', selector: { boolean: {} } },
+          ],
+        },
+      ],
+      computeLabel: (schema: { name: string }): string | undefined => EDITOR_LABELS[schema.name],
+      computeHelper: (schema: { name: string }): string | undefined => EDITOR_HELPERS[schema.name],
+    };
   }
 
   public static getStubConfig(): Record<string, unknown> {

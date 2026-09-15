@@ -36,6 +36,14 @@ A Lovelace card that shows a liquid fill level for [Home Assistant](https://home
 
 ## Using the card
 
+The card ships no editor of its own: it declares a form schema and Home Assistant
+renders the configuration UI natively, so the controls are the ones you know from
+built-in cards — a real entity picker, proper number fields, native switches. This
+needs **Home Assistant 2026.6 or newer**; `hacs.json` declares that minimum.
+
+Actions (`tap_action`, `hold_action`, `double_tap_action`) are not part of the form
+and remain YAML-only.
+
 - Add the card with the visual editor
 - Or add the card manually with the following (minimal) configuration:
 

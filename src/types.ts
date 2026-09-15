@@ -1,8 +1,7 @@
-import { ActionConfig, LovelaceCard, LovelaceCardConfig, LovelaceCardEditor } from 'custom-card-helpers';
+import { ActionConfig, LovelaceCard, LovelaceCardConfig } from 'custom-card-helpers';
 
 declare global {
   interface HTMLElementTagNameMap {
-    'liquid-level-gauge-card-editor': LovelaceCardEditor;
     'hui-error-card': LovelaceCard;
   }
 }
