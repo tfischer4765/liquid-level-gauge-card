@@ -75,8 +75,6 @@
         ['max_level: 40 (Zahl)', '20/40 -> halb', { entity: 'sensor.tank', max_level: 40 }],
         ['max_level: "40" (String, wie Editor)', '20/40 -> halb, wie oben', { entity: 'sensor.tank', max_level: '40' }],
         ['max_level: 10 (Wert > max)', 'randvoll', { entity: 'sensor.tank', max_level: 10 }],
-        ['is_imperial', 'Einheit in, 20in=508mm > 40 -> voll', { entity: 'sensor.tank', is_imperial: true }],
-        ['is_imperial + max_level 40', '508mm / 1016mm -> halb', { entity: 'sensor.tank', is_imperial: true, max_level: 40 }],
         ['secondary_entity', 'zweiter Block Rate 3.5 mm/h', { entity: 'sensor.tank', secondary_entity: 'sensor.flow' }],
         ['language: de', 'Gesamt / Intensitaet', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'de' }],
         ['language: cs', 'Uhrn srazek / Intenzita srazek', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'cs' }],
@@ -96,6 +94,7 @@
         ['Flow-Entity mit eigener Einheit L/h', 'erwartet L/h, nicht %/h', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.flowlh' }],
         ['Pumpenleistung als 2. Entity', 'Cistern Level 75 % / Pump Power 450 W', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.pump' }],
         ['2. Entity ohne Einheit', 'nur die Zahl, nichts angehaengt', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.nounit' }],
+        ['Haupt-Entity ohne Einheit', 'nackte Zahl, kein erfundenes mm', { entity: 'sensor.nounit', max_level: 10 }],
         ['aspect_ratio: 1 (Kreis)', 'Breite 182 = Hoehe', { entity: 'sensor.tank', aspect_ratio: 1 }],
         ['aspect_ratio: 2 (Default)', 'Breite 91', { entity: 'sensor.tank', aspect_ratio: 2 }],
         ['aspect_ratio unges., = Default', 'Breite 91 wie oben', { entity: 'sensor.tank' }],
@@ -220,7 +219,7 @@
       {
         const KNOWN_KEYS = [
           'entity', 'name', 'max_level', 'aspect_ratio', 'secondary_entity',
-          'fill_drop_colour', 'border_colour', 'is_imperial', 'language',
+          'fill_drop_colour', 'border_colour', 'language',
           'show_warning', 'show_error',
         ];
 

@@ -78,7 +78,6 @@ entity: sensor.cistern_level
 | max_level         | number  | **Optional** | Value at which the gauge counts as full, read in the displayed unit       | `40`                |
 | aspect_ratio      | number  | **Optional** | Gauge shape as height:width, `1` a circle … `10` a slim tube             | `2`                 |
 | language          | string  | **Optional** | The 2 character that determines the language                             | `en`                |
-| is_imperial       | boolean | **Optional** | Treat the value as inches; forces the displayed unit to `in`             | `false`             |
 | secondary_entity  | string  | **Optional** | Second entity to display; shown with its own name and unit, nothing else | `none`              |
 | tap_action        | object  | **Optional** | Action to take on tap                                                    | `action: more-info` |
 | hold_action       | object  | **Optional** | Action to take on hold                                                   | `none`              |
@@ -86,13 +85,11 @@ entity: sensor.cistern_level
 
 ### Units
 
-The card shows the `unit_of_measurement` reported by the entity, so a level measured
-in `%`, `L`, `m³` or `cm` is labelled correctly without any configuration. Only when
-the entity reports no unit does it fall back to `mm`. Setting `is_imperial` overrides
-this and treats the value as inches.
+The unit comes from the entity and from nowhere else. A level measured in `%`, `L`,
+`m³` or `cm` is labelled correctly without any configuration, and an entity that
+reports no unit is shown as a bare number rather than being given an invented one.
 
-`max_level` is read in that same displayed unit — with `is_imperial` set, `max_level: 40`
-means 40 inches, not 40 mm.
+`max_level` is read in that same unit. The card performs no conversion of any kind.
 
 ### Shape
 

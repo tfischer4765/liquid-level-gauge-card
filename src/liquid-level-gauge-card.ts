@@ -30,8 +30,8 @@ console.info(
   description: 'A Lovelace card that shows a liquid fill level',
 });
 
-// Read in the unit the card displays, so `40` means 40 mm by default and 40 in
-// when is_imperial is set.
+// Read in whatever unit the entity reports; the card neither converts nor
+// assumes one.
 const DEFAULT_MAX_LEVEL = 40;
 
 // Muted foreground if the theme offers one, plain foreground if not, and
@@ -57,7 +57,6 @@ const EDITOR_LABELS: Record<string, string> = {
   secondary_entity: 'Secondary entity (display only)',
   fill_drop_colour: 'Fill colour',
   border_colour: 'Outline colour',
-  is_imperial: 'Treat the value as inches',
   language: 'Language',
   show_warning: 'Show the warning placeholder',
   show_error: 'Show the error placeholder',
@@ -65,12 +64,11 @@ const EDITOR_LABELS: Record<string, string> = {
 
 const EDITOR_HELPERS: Record<string, string> = {
   entity: 'The one thing this card promises: the gauge always follows this entity.',
-  max_level: 'Read in the unit the card displays. Defaults to 40.',
+  max_level: "Read in the entity's own unit. Defaults to 40.",
   aspect_ratio: '1 is a circle, 10 a slim sight glass.',
   secondary_entity: 'Shown with its own name and unit. Has no effect on the gauge.',
   fill_drop_colour: 'Any CSS colour. Leave empty for the default blue.',
   border_colour: 'Any CSS colour. Leave empty to follow the active theme.',
-  is_imperial: 'Converts the value from inches and forces the displayed unit to "in".',
 };
 
 @customElement('liquid-level-gauge-card')
@@ -111,7 +109,6 @@ export class LiquidLevelGaugeCard extends LitElement {
           type: 'expandable',
           title: 'Advanced',
           schema: [
-            { name: 'is_imperial', selector: { boolean: {} } },
             {
               name: 'language',
               selector: { select: { mode: 'dropdown', options: CARD_LANGUAGES.filter(Boolean) } },
@@ -208,22 +205,14 @@ export class LiquidLevelGaugeCard extends LitElement {
     // verbatim. Fall back to an empty gauge and show the raw state instead.
     const hasValue = Number.isFinite(stateValue);
 
-    // A level is measured in whatever its sensor reports -- percent, litres,
-    // centimetres. Hard-coded mm/in only ever made sense for a rain gauge, so the
-    // entity's own unit wins; `is_imperial` stays an explicit override.
-    const unitOfMeasurement = this.config.is_imperial
-      ? 'in'
-      : entityState?.attributes?.unit_of_measurement ?? 'mm';
+    // The unit comes from the entity and nowhere else. A level can be percent,
+    // litres, centimetres or nothing at all -- inventing one here would only ever
+    // mislabel it.
+    const unitOfMeasurement = entityState?.attributes?.unit_of_measurement ?? '';
 
-    // Both the value and the maximum are converted together, so `max_level` is
-    // always read in the unit the card displays. A falsy max_level (including 0)
-    // keeps the documented default.
-    let totalLevelValue = hasValue ? stateValue : 0;
-    let maxLevel = this.config.max_level ? Number(this.config.max_level) : DEFAULT_MAX_LEVEL;
-    if (this.config.is_imperial) {
-      totalLevelValue = this._inches2mm(totalLevelValue);
-      maxLevel = this._inches2mm(maxLevel);
-    }
+    // A falsy max_level (including 0) keeps the documented default.
+    const totalLevelValue = hasValue ? stateValue : 0;
+    const maxLevel = this.config.max_level ? Number(this.config.max_level) : DEFAULT_MAX_LEVEL;
 
     // Height-to-width ratio of the gauge. 1 makes the two caps meet, i.e. a
     // circle; 10 a slim sight glass. Out-of-range and non-numeric values are
@@ -378,11 +367,6 @@ export class LiquidLevelGaugeCard extends LitElement {
     });
 
     return html` ${errorCard} `;
-  }
-
-  private _inches2mm(value: number): number {
-    const valueConverted = value * 25.4
-    return Math.round((valueConverted + Number.EPSILON) * 100) / 100
   }
 
   // https://lit.dev/docs/components/styles/
