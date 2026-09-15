@@ -46,11 +46,15 @@ cp dev/test-params.html dist/          # dist/ is the dev server's document root
 open http://127.0.0.1:5001/test-params.html
 ```
 
-Headless, with a screenshot and the machine-readable results:
+Headless, with a screenshot and the machine-readable results. On macOS the binary
+lives inside the app bundle rather than on `PATH`, hence the fallback:
 
 ```bash
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
-  --headless --disable-gpu --screenshot=/tmp/params.png \
+CHROME="${CHROME:-$(command -v google-chrome || command -v chromium \
+  || echo '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')}"
+
+"$CHROME" --headless --disable-gpu \
+  --screenshot="${TMPDIR:-/tmp}/params.png" \
   --window-size=1280,1500 --virtual-time-budget=8000 \
   http://127.0.0.1:5001/test-params.html
 ```
