@@ -62,6 +62,10 @@ export class LiquidLevelGaugeCardEditor extends ScopedRegistryHost(LitElement) i
     return this._config?.max_level || '';
   }
 
+  get _aspect_ratio(): number | string {
+    return this._config?.aspect_ratio || '';
+  }
+
   get _secondary_entity(): string {
     return this._config?.secondary_entity || '';
   }
@@ -150,6 +154,16 @@ export class LiquidLevelGaugeCardEditor extends ScopedRegistryHost(LitElement) i
         step=1
         .value=${this._max_level}
         .configValue=${'max_level'}
+        @input=${this._valueChanged}
+      ></mwc-textfield>
+      <mwc-textfield
+        label="Aspect ratio, height:width, 1 = circle (Optional)"
+        type="number"
+        max=10
+        min=1
+        step=0.5
+        .value=${this._aspect_ratio}
+        .configValue=${'aspect_ratio'}
         @input=${this._valueChanged}
       ></mwc-textfield>
       <mwc-select

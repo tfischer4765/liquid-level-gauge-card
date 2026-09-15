@@ -68,6 +68,7 @@ entity: sensor.cistern_level
 | show_warning      | boolean | **Optional** | Show what a warning looks like for the card                              | `false`             |
 | entity            | string  | **Required** | Home Assistant entity ID.                                                | `none`              |
 | max_level         | number  | **Optional** | Value at which the gauge counts as full, read in the displayed unit       | `40`                |
+| aspect_ratio      | number  | **Optional** | Gauge shape as height:width, `1` a circle … `10` a slim tube             | `2`                 |
 | language          | string  | **Optional** | The 2 character that determines the language                             | `en`                |
 | is_imperial       | boolean | **Optional** | Treat the value as inches; forces the displayed unit to `in`             | `false`             |
 | secondary_entity  | string  | **Optional** | Second entity to display; shown with its own name and unit, nothing else | `none`              |
@@ -84,6 +85,25 @@ this and treats the value as inches.
 
 `max_level` is read in that same displayed unit — with `is_imperial` set, `max_level: 40`
 means 40 inches, not 40 mm.
+
+### Shape
+
+`aspect_ratio` is the gauge's height divided by its width:
+
+| Value | Shape |
+| ----- | ----- |
+| `1`   | a circle — the two semicircular caps meet and the straight section vanishes |
+| `2`   | the default capsule |
+| `3`–`5` | an increasingly slender tube |
+| `10`  | a slim sight glass |
+
+The height stays the same at every ratio, so changing it never moves the rest of the
+card; only the width follows. Values outside 1–10 are clamped rather than rejected,
+and so is anything that is not a number — a typo narrows the gauge instead of
+breaking the card.
+
+Below 1 the caps would overlap and the shape would stop being a stadium, which is
+why 1 is the floor rather than an arbitrary limit.
 
 ### The two entities
 

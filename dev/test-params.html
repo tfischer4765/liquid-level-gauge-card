@@ -96,6 +96,14 @@
         ['Flow-Entity mit eigener Einheit L/h', 'erwartet L/h, nicht %/h', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.flowlh' }],
         ['Pumpenleistung als 2. Entity', 'Cistern Level 75 % / Pump Power 450 W', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.pump' }],
         ['2. Entity ohne Einheit', 'nur die Zahl, nichts angehaengt', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.nounit' }],
+        ['aspect_ratio: 1 (Kreis)', 'Breite 182 = Hoehe', { entity: 'sensor.tank', aspect_ratio: 1 }],
+        ['aspect_ratio: 2 (Default)', 'Breite 91', { entity: 'sensor.tank', aspect_ratio: 2 }],
+        ['aspect_ratio unges., = Default', 'Breite 91 wie oben', { entity: 'sensor.tank' }],
+        ['aspect_ratio: 10 (Rohr)', 'Breite 18.2', { entity: 'sensor.tank', aspect_ratio: 10 }],
+        ['aspect_ratio: "3" (String/Editor)', 'Breite 60.667', { entity: 'sensor.tank', aspect_ratio: '3' }],
+        ['aspect_ratio: 0.5 -> klemmt auf 1', 'Breite 182', { entity: 'sensor.tank', aspect_ratio: 0.5 }],
+        ['aspect_ratio: 99 -> klemmt auf 10', 'Breite 18.2', { entity: 'sensor.tank', aspect_ratio: 99 }],
+        ['aspect_ratio: "quark" -> Default', 'Breite 91', { entity: 'sensor.tank', aspect_ratio: 'quark' }],
         ['tap/hold/double_tap', 'rendert normal', {
           entity: 'sensor.tank',
           tap_action: { action: 'more-info' },
@@ -130,6 +138,8 @@
             text: txt,
             translate: rect?.getAttribute('transform') ?? null,
             fill: rect?.getAttribute('style') ?? null,
+            width: rect?.getAttribute('width') ?? null,
+            d: el.shadowRoot?.querySelector('clipPath path')?.getAttribute('d') ?? null,
           });
         } catch (e) {
           box.insertAdjacentHTML('beforeend', `<div style="padding:8px;background:#f8d7da">THREW: ${e.message}</div>`);

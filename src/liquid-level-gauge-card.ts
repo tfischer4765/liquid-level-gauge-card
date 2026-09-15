@@ -35,6 +35,12 @@ console.info(
 // when is_imperial is set.
 const DEFAULT_MAX_LEVEL = 40;
 
+// Gauge height : width. 1 is a circle, 10 a slim sight glass. Below 1 the caps
+// would overlap and the stadium stops being one, which is why 1 is the floor.
+const DEFAULT_ASPECT_RATIO = 2;
+const MIN_ASPECT_RATIO = 1;
+const MAX_ASPECT_RATIO = 10;
+
 @customElement('liquid-level-gauge-card')
 export class LiquidLevelGaugeCard extends LitElement {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
@@ -126,26 +132,40 @@ export class LiquidLevelGaugeCard extends LitElement {
       maxLevel = this._inches2mm(maxLevel);
     }
 
+    // Height-to-width ratio of the gauge. 1 makes the two caps meet, i.e. a
+    // circle; 10 a slim sight glass. Out-of-range and non-numeric values are
+    // clamped rather than rejected, so a typo narrows the gauge instead of
+    // breaking the card.
+    const configuredAspect = Number(this.config.aspect_ratio)
+    const aspectRatio = Number.isFinite(configuredAspect)
+      ? Math.min(MAX_ASPECT_RATIO, Math.max(MIN_ASPECT_RATIO, configuredAspect))
+      : DEFAULT_ASPECT_RATIO
+
     // Gauge outline: a stadium -- a rectangle capped by a semicircle top and bottom.
-    // Kept inside the original 200x200 viewBox so the card layout does not shift.
+    // The height is fixed so the card never changes height; only the width follows
+    // the ratio. At the narrowest allowed ratio the shape is still 182 wide, which
+    // fits the 200-wide viewBox, so the layout never shifts.
     const gaugeTop = 8
     const gaugeBottom = 190
-    const gaugeRadius = 55
-    const gaugeCentreX = 68
+    const gaugeBoxHeight = gaugeBottom - gaugeTop
+    const gaugeRadius = gaugeBoxHeight / aspectRatio / 2
+    const gaugeCentreX = 100
     const gaugeLeft = gaugeCentreX - gaugeRadius
     const gaugeRight = gaugeCentreX + gaugeRadius
     const gaugeArcTop = gaugeTop + gaugeRadius
     const gaugeArcBottom = gaugeBottom - gaugeRadius
+    // At aspectRatio 1 the two arc centres coincide and the straight section
+    // collapses to a zero-length line, leaving a clean circle.
+    const r = (n: number): number => Math.round(n * 1000) / 1000
     const gaugePath =
-      `M${gaugeLeft},${gaugeArcTop} ` +
-      `A${gaugeRadius},${gaugeRadius} 0 0 1 ${gaugeRight},${gaugeArcTop} ` +
-      `L${gaugeRight},${gaugeArcBottom} ` +
-      `A${gaugeRadius},${gaugeRadius} 0 0 1 ${gaugeLeft},${gaugeArcBottom} Z`
+      `M${r(gaugeLeft)},${r(gaugeArcTop)} ` +
+      `A${r(gaugeRadius)},${r(gaugeRadius)} 0 0 1 ${r(gaugeRight)},${r(gaugeArcTop)} ` +
+      `L${r(gaugeRight)},${r(gaugeArcBottom)} ` +
+      `A${r(gaugeRadius)},${r(gaugeRadius)} 0 0 1 ${r(gaugeLeft)},${r(gaugeArcBottom)} Z`
 
     // gaugeBoxHeight min (empty) - 0 max (full). The fill rect starts at the gauge
     // top, so translating it by the full height moves it exactly onto the gauge
     // bottom edge, leaving nothing visible.
-    const gaugeBoxHeight = gaugeBottom - gaugeTop
     let gaugeLevel = gaugeBoxHeight
     if (totalLevelValue > 0 && totalLevelValue < maxLevel) {
       gaugeLevel = gaugeBoxHeight - Math.round(gaugeBoxHeight / maxLevel * totalLevelValue)
@@ -195,9 +215,9 @@ export class LiquidLevelGaugeCard extends LitElement {
 
                   <g clip-path="url(#gauge)">
                     <rect
-                      x=${gaugeLeft}
+                      x=${r(gaugeLeft)}
                       y=${gaugeTop}
-                      width=${gaugeRadius * 2}
+                      width=${r(gaugeRadius * 2)}
                       height=${gaugeBoxHeight}
                       style="fill:${fillDropColour};"
                       transform="translate(0, ${gaugeLevel})"
