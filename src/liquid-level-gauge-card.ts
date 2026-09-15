@@ -87,6 +87,7 @@ export class LiquidLevelGaugeCard extends LitElement {
         { name: 'name', selector: { text: {} } },
         {
           type: 'grid',
+          title: 'Scale',
           schema: [
             { name: 'max_level', selector: { number: { min: 0, step: 'any', mode: 'box' } } },
             {
@@ -120,11 +121,21 @@ export class LiquidLevelGaugeCard extends LitElement {
           ],
         },
       ],
-      // Must never return undefined. Home Assistant falls back to
-      // `schema.name.split("_")`, and grid/expandable containers carry no name,
-      // so an undefined here throws before the form renders at all.
-      computeLabel: (schema: { name?: string; title?: string }): string =>
-        (schema.name ? EDITOR_LABELS[schema.name] : undefined) ?? schema.title ?? '',
+      // Must return a NON-EMPTY string for every entry, containers included.
+      // Home Assistant chains with `||`, not `??`:
+      //
+      //   this.computeLabel(schema, localize) ||
+      //   localize(`…generic.${schema.name}`) ||
+      //   capitalizeFirstLetter(schema.name.split("_").join(" "))
+      //
+      // so anything falsy -- undefined and the empty string alike -- falls
+      // through to that last line, which dereferences a name the grid and
+      // expandable containers do not have, and the form never renders at all.
+      computeLabel: (schema: { name?: string; title?: string; type?: string }): string =>
+        (schema.name ? EDITOR_LABELS[schema.name] : undefined) ||
+        schema.title ||
+        schema.type ||
+        'Options',
       computeHelper: (schema: { name?: string }): string | undefined =>
         schema.name ? EDITOR_HELPERS[schema.name] : undefined,
     };

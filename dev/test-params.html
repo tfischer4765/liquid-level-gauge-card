@@ -238,8 +238,18 @@
         const names = fields.map((f) => f.name);
 
         const badLabel = everyEntry(form.schema)
-          .filter((e) => typeof form.computeLabel(e) !== 'string')
+          .filter((e) => { const l = form.computeLabel(e); return typeof l !== 'string' || l === ''; })
           .map((e) => e.name ?? e.type ?? '?');
+        // Repliziert HAs _computeLabelCallback wortwoertlich, im schlechtesten
+        // Fall: computeLabel falsy UND localize liefert nichts -> der letzte Term
+        // dereferenziert schema.name, den Container nicht haben.
+        const haCrash = [];
+        for (const e of everyEntry(form.schema)) {
+          try {
+            void (form.computeLabel(e, () => '') || '' || e.name.split('_').join(' '));
+          } catch (err) { haCrash.push(e.name ?? e.type ?? '?'); }
+        }
+
         const helperThrows = [];
         for (const e of everyEntry(form.schema)) {
           try { form.computeHelper(e); } catch (err) { helperThrows.push(e.name ?? e.type); }
@@ -262,7 +272,8 @@
             ' | doppelt=[' + dupes.join(',') + ']' +
             ' | ohne Selector=[' + noSelector.join(',') + ']' +
             ' | ohne Label=[' + noLabel.join(',') + ']' +
-            ' | Label nicht String=[' + badLabel.join(',') + ']' +
+            ' | Label leer/kein String=[' + badLabel.join(',') + ']' +
+            ' | HA-Kette wirft=[' + haCrash.join(',') + ']' +
             ' | Helper wirft=[' + helperThrows.join(',') + ']' +
             ' | entity required=' + !!fields.find((f) => f.name === 'entity')?.required,
         });
