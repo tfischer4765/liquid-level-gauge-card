@@ -35,6 +35,12 @@ console.info(
 // when is_imperial is set.
 const DEFAULT_MAX_LEVEL = 40;
 
+// Muted foreground if the theme offers one, plain foreground if not, and
+// finally whatever colour is inherited. Home Assistant defines the first two;
+// the chain keeps the card usable outside it as well.
+const DEFAULT_BORDER_COLOUR =
+  'var(--secondary-text-color, var(--primary-text-color, currentColor))';
+
 // Gauge height : width. 1 is a circle, 10 a slim sight glass. Below 1 the caps
 // would overlap and the stadium stops being one, which is why 1 is the floor.
 const DEFAULT_ASPECT_RATIO = 2;
@@ -174,10 +180,12 @@ export class LiquidLevelGaugeCard extends LitElement {
       gaugeLevel = 0
     }
 
-    let borderColour = '#000000'
-    if (this.config.border_colour) {
-      borderColour = this.config.border_colour
-    }
+    // Without an explicit border_colour the outline follows the active theme
+    // rather than being hard-coded black, which was invisible on every dark
+    // theme. Custom properties cross the shadow boundary, so Home Assistant's
+    // theme variables resolve in here; currentColor is the last resort and
+    // inherits whatever colour the surrounding card text has.
+    const borderColour = this.config.border_colour || DEFAULT_BORDER_COLOUR
 
     let fillDropColour = '#04ACFF'
     if (this.config.fill_drop_colour) {

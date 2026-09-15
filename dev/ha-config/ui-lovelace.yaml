@@ -15,6 +15,7 @@ views:
       # Minimal configuration.
       - type: custom:liquid-level-gauge-card
         entity: input_number.tank_level
+        aspect_ratio: 1
         max_level: 100
 
       # Everything wired up: flow rate, custom colours, explicit name.
@@ -23,13 +24,15 @@ views:
         entity: input_number.tank_level
         secondary_entity: input_number.tank_flow_rate
         max_level: 100
+        aspect_ratio: 5
         fill_drop_colour: '#04ACFF'
         border_colour: '#1B4965'
 
       # Edge cases worth eyeballing on every change.
       - type: custom:liquid-level-gauge-card
         name: Empty (0)
-        entity: input_number.tank_flow_rate
+        entity: input_number.tank_level
+        aspect_ratio: 10
         max_level: 100
 
       - type: custom:liquid-level-gauge-card

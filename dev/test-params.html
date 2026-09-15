@@ -175,6 +175,42 @@
           translate: null, fill: null });
       }
 
+
+      // --- Aufloesung der Konturfarbe ---------------------------------------
+      // Prueft die var()-Kette, nicht das Aussehen: Custom Properties werden auf
+      // einem Container gesetzt und die berechnete stroke-Farbe des Umrisses
+      // zurueckgelesen. Voellig unabhaengig davon, wie Home Assistant aussieht.
+      {
+        const strokeOf = async (vars, config) => {
+          const box = document.createElement('div');
+          for (const [k, v] of Object.entries(vars)) box.style.setProperty(k, v);
+          document.body.appendChild(box);
+          const el = document.createElement('liquid-level-gauge-card');
+          el.setConfig({ type: 'custom:liquid-level-gauge-card', entity: 'sensor.tank', ...config });
+          el.hass = hass;
+          box.appendChild(el);
+          await el.updateComplete;
+          const outline = el.shadowRoot.querySelector('svg > path');
+          return getComputedStyle(outline).stroke;
+        };
+
+        const cases = [
+          ['beide Variablen gesetzt -> secondary gewinnt',
+            { '--secondary-text-color': 'rgb(1, 2, 3)', '--primary-text-color': 'rgb(9, 9, 9)' }, {}],
+          ['nur primary gesetzt -> primary',
+            { '--primary-text-color': 'rgb(9, 9, 9)' }, {}],
+          ['keine Variable, color geerbt -> currentColor',
+            { color: 'rgb(7, 7, 7)' }, {}],
+          ['border_colour gesetzt -> schlaegt alles',
+            { '--secondary-text-color': 'rgb(1, 2, 3)' }, { border_colour: '#ff00ff' }],
+        ];
+
+        for (const [label, vars, config] of cases) {
+          results.push({ case: 'KONTUR: ' + label, ok: true, text: await strokeOf(vars, config),
+                         translate: null, fill: null });
+        }
+      }
+
       window.__RESULTS__ = results;
       const pre = document.createElement('pre');
       pre.id = 'results';

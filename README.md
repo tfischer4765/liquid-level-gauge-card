@@ -62,7 +62,7 @@ entity: sensor.cistern_level
 | ----------------- | ------- | ------------ | ------------------------------------------------------------------------ | ------------------- |
 | type              | string  | **Required** | `custom:liquid-level-gauge-card`                                                 |                     |
 | name              | string  | **Optional** | Card name                                                                | `Liquid Level Gauge`        |
-| border_colour     | string  | **Optional** | Change the border colour                                                 | `#000000`           |
+| border_colour     | string  | **Optional** | Outline colour; unset it follows the active theme                        | theme foreground    |
 | fill_drop_colour  | string  | **Optional** | Change the fill colour                                                   | `#04ACFF`           |
 | show_error        | boolean | **Optional** | Show what an error looks like for the card                               | `false`             |
 | show_warning      | boolean | **Optional** | Show what a warning looks like for the card                              | `false`             |
@@ -104,6 +104,22 @@ breaking the card.
 
 Below 1 the caps would overlap and the shape would stop being a stadium, which is
 why 1 is the floor rather than an arbitrary limit.
+
+### Outline colour
+
+Left unset, the outline follows whatever theme is active instead of being a fixed
+colour — it used to be hard-coded black, which is invisible on every dark theme. The
+card asks for, in order:
+
+```css
+var(--secondary-text-color, var(--primary-text-color, currentColor))
+```
+
+So it takes the theme's muted foreground if there is one, the plain foreground if
+not, and otherwise simply inherits the colour of the surrounding card text. Home
+Assistant defines the first two, and the last keeps the card sane outside it.
+
+Setting `border_colour` overrides all of that with a literal colour.
 
 ### The two entities
 
