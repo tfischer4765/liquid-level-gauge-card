@@ -1,5 +1,6 @@
 {
     "name": "Liquid Level Gauge Card",
     "render_readme": true,
-    "filename": "liquid-level-gauge-card.js"
+    "filename": "liquid-level-gauge-card.js",
+    "hide_default_branch": true
 }

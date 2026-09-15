@@ -197,7 +197,11 @@ If you wish to add a language please follow these steps:
 ## Releasing
 
 The built bundle is not committed — `dist/` stays ignored, and HACS resolves the
-card through GitHub releases. Cutting one is a tag push:
+card through GitHub releases. That is why `hacs.json` sets `hide_default_branch`:
+without it HACS also evaluates the default branch, finds no `.js` file there and
+reports the repository structure as non-compliant.
+
+Cutting a release is a tag push:
 
 ```bash
 git tag -a v0.1.0 -m "What changed in this version"
