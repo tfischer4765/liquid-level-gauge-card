@@ -31,6 +31,9 @@ export default {
       allowCrossOrigin: true,
       headers: {
         'Access-Control-Allow-Origin': '*',
+        // See rollup.config.js: no cache directives means heuristic caching,
+        // and a stale bundle is indistinguishable from a broken change.
+        'Cache-Control': 'no-store',
       },
     }),
   ],

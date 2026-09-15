@@ -16,6 +16,10 @@ const serveopts = {
   allowCrossOrigin: true,
   headers: {
     'Access-Control-Allow-Origin': '*',
+    // Without this the server sends no cache directives at all, so browsers
+    // apply heuristic caching and keep serving a stale bundle after a rebuild --
+    // which looks exactly like the card not having changed.
+    'Cache-Control': 'no-store',
   },
 };
 

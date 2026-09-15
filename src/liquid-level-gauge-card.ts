@@ -120,8 +120,13 @@ export class LiquidLevelGaugeCard extends LitElement {
           ],
         },
       ],
-      computeLabel: (schema: { name: string }): string | undefined => EDITOR_LABELS[schema.name],
-      computeHelper: (schema: { name: string }): string | undefined => EDITOR_HELPERS[schema.name],
+      // Must never return undefined. Home Assistant falls back to
+      // `schema.name.split("_")`, and grid/expandable containers carry no name,
+      // so an undefined here throws before the form renders at all.
+      computeLabel: (schema: { name?: string; title?: string }): string =>
+        (schema.name ? EDITOR_LABELS[schema.name] : undefined) ?? schema.title ?? '',
+      computeHelper: (schema: { name?: string }): string | undefined =>
+        schema.name ? EDITOR_HELPERS[schema.name] : undefined,
     };
   }
 

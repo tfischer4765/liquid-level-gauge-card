@@ -229,8 +229,21 @@
 
         const flatten = (schema) =>
           schema.flatMap((e) => (e.schema ? flatten(e.schema) : [e]));
+        // ALLE Eintraege, Container eingeschlossen: HA ruft computeLabel auch
+        // fuer grid/expandable auf und faellt bei undefined auf
+        // schema.name.split() zurueck, was fuer Container ohne name wirft.
+        const everyEntry = (schema) =>
+          schema.flatMap((e) => (e.schema ? [e, ...everyEntry(e.schema)] : [e]));
         const fields = flatten(form.schema);
         const names = fields.map((f) => f.name);
+
+        const badLabel = everyEntry(form.schema)
+          .filter((e) => typeof form.computeLabel(e) !== 'string')
+          .map((e) => e.name ?? e.type ?? '?');
+        const helperThrows = [];
+        for (const e of everyEntry(form.schema)) {
+          try { form.computeHelper(e); } catch (err) { helperThrows.push(e.name ?? e.type); }
+        }
 
         const unknown = names.filter((n) => !KNOWN_KEYS.includes(n));
         const missing = KNOWN_KEYS.filter((k) => !names.includes(k));
@@ -241,12 +254,16 @@
         results.push({
           case: 'FORM', ok: true, translate: null, fill: null,
           text:
-            'Felder=' + names.length +
+            'Blaetter=' + names.length +
+            ' | Eintraege gesamt=' + everyEntry(form.schema).length +
+            ' | Container=' + everyEntry(form.schema).filter((e) => e.schema).map((e) => e.type).join('/') +
             ' | unbekannte Keys=[' + unknown.join(',') + ']' +
             ' | fehlende Keys=[' + missing.join(',') + ']' +
             ' | doppelt=[' + dupes.join(',') + ']' +
             ' | ohne Selector=[' + noSelector.join(',') + ']' +
             ' | ohne Label=[' + noLabel.join(',') + ']' +
+            ' | Label nicht String=[' + badLabel.join(',') + ']' +
+            ' | Helper wirft=[' + helperThrows.join(',') + ']' +
             ' | entity required=' + !!fields.find((f) => f.name === 'entity')?.required,
         });
       }
