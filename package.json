@@ -49,8 +49,9 @@
   },
   "scripts": {
     "start": "rollup -c rollup.config.dev.js --watch",
-    "build": "npm run lint && npm run rollup",
+    "build": "npm run lint && npm run rollup && npm run check",
     "lint": "eslint src/*.ts",
-    "rollup": "rollup -c"
+    "rollup": "rollup -c",
+    "check": "node scripts/sanity-check.mjs"
   }
 }

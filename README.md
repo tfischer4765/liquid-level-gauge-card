@@ -257,8 +257,22 @@ Two conventions are enforced by that workflow:
 - **The tag's annotation becomes the release notes**, with the generated commit
   listing appended below it. Write the changelog in `git tag -a`, not in the web UI.
 
-Keep `CARD_VERSION` in `src/const.ts` and `version` in `package.json` in sync with
-the tag — nothing checks this, and the card logs its version to the browser console.
+`CARD_VERSION` in `src/const.ts`, `version` in `package.json` and the tag must all
+agree. This is enforced rather than remembered:
+
+```bash
+npm run check            # working tree only
+npm run check -- v0.2.0  # also require the tag to agree
+```
+
+`npm run build` runs the first form, so a local build catches a version that has
+drifted. The release workflow runs the second, and a mismatch there aborts before
+any release is created.
+
+The same script also checks that the file named in `hacs.json` was actually built
+and that the bundle registers an element matching that filename — a pair that can
+diverge silently and leaves the card installable but unusable as
+`custom:<name>`.
 
 ## Thanks to
 
