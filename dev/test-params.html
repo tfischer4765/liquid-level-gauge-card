@@ -71,7 +71,7 @@
         ['minimal (entity, default max_level 40)', 'Wert 20 von 40 -> halb voll', { entity: 'sensor.tank' }],
         ['name', 'Kopfzeile "Zisterne"', { entity: 'sensor.tank', name: 'Zisterne' }],
         ['border_colour', 'Kontur rot', { entity: 'sensor.tank', border_colour: '#cc0000' }],
-        ['fill_drop_colour', 'Fuellung gruen', { entity: 'sensor.tank', fill_drop_colour: '#22aa55' }],
+        ['fill_colour', 'Fuellung gruen', { entity: 'sensor.tank', fill_colour: '#22aa55' }],
         ['max_level: 40 (Zahl)', '20/40 -> halb', { entity: 'sensor.tank', max_level: 40 }],
         ['max_level: "40" (String, wie Editor)', '20/40 -> halb, wie oben', { entity: 'sensor.tank', max_level: '40' }],
         ['max_level: 10 (Wert > max)', 'randvoll', { entity: 'sensor.tank', max_level: 10 }],
@@ -219,7 +219,7 @@
       {
         const KNOWN_KEYS = [
           'entity', 'name', 'max_level', 'aspect_ratio', 'secondary_entity',
-          'fill_drop_colour', 'border_colour', 'language',
+          'fill_colour', 'border_colour', 'language',
           'show_warning', 'show_error',
         ];
 
@@ -254,8 +254,11 @@
           try { form.computeHelper(e); } catch (err) { helperThrows.push(e.name ?? e.type); }
         }
 
+        // Bewusst nicht im Formular: Entwicklerhilfen, nur ueber YAML erreichbar.
+        const NOT_IN_FORM = ['show_warning', 'show_error'];
+
         const unknown = names.filter((n) => !KNOWN_KEYS.includes(n));
-        const missing = KNOWN_KEYS.filter((k) => !names.includes(k));
+        const missing = KNOWN_KEYS.filter((k) => !names.includes(k) && !NOT_IN_FORM.includes(k));
         const noSelector = fields.filter((f) => !f.selector && !f.type).map((f) => f.name);
         const noLabel = names.filter((n) => !form.computeLabel({ name: n }));
         const dupes = names.filter((n, i) => names.indexOf(n) !== i);

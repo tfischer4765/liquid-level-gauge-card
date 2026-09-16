@@ -72,8 +72,9 @@ built-in cards — a real entity picker, proper number fields, native switches. 
 needs **Home Assistant 2026.6 or newer**. On older versions the card itself still
 works; only the visual editor is unavailable, and you configure it in YAML instead.
 
-Actions (`tap_action`, `hold_action`, `double_tap_action`) are not part of the form
-and remain YAML-only.
+Not every option appears in the form. The actions (`tap_action`, `hold_action`,
+`double_tap_action`) and the two placeholder switches (`show_warning`, `show_error`,
+which only exist to see what those states look like) remain YAML-only.
 
 - Add the card with the visual editor
 - Or add the card manually with the following (minimal) configuration:
@@ -102,12 +103,12 @@ entity: sensor.cistern_level
 | type              | string  | **Required** | `custom:liquid-level-gauge-card`                                                 |                     |
 | name              | string  | **Optional** | Card name                                                                | `Liquid Level Gauge`        |
 | border_colour     | string  | **Optional** | Outline colour; unset it follows the active theme                        | theme foreground    |
-| fill_drop_colour  | string  | **Optional** | Change the fill colour                                                   | `#04ACFF`           |
+| fill_colour       | string  | **Optional** | Change the fill colour                                                   | `#04ACFF`           |
 | show_error        | boolean | **Optional** | Show what an error looks like for the card                               | `false`             |
 | show_warning      | boolean | **Optional** | Show what a warning looks like for the card                              | `false`             |
-| entity            | string  | **Required** | Home Assistant entity ID.                                                | `none`              |
+| entity            | string  | **Required** | The `entity_id` of the main Home Assistant entity whose state you want the card to show.                                                | `none`              |
 | max_level         | number  | **Optional** | Value at which the gauge counts as full, in the entity's own unit        | `40`                |
-| aspect_ratio      | number  | **Optional** | Gauge shape as height:width, `1` a circle … `10` a slim tube             | `2`                 |
+| aspect_ratio      | number  | **Optional** | Gauge shape as `aspect_ratio`:width, `1` rendering as a circle … `10` as a slim tube             | `2`                 |
 | language          | string  | **Optional** | The 2 character that determines the language                             | `en`                |
 | secondary_entity  | string  | **Optional** | Second entity to display; shown with its own name and unit, nothing else | `none`              |
 | tap_action        | object  | **Optional** | Action to take on tap                                                    | `action: more-info` |
@@ -135,37 +136,24 @@ reports no unit is shown as a bare number rather than being given an invented on
 
 The height stays the same at every ratio, so changing it never moves the rest of the
 card; only the width follows. Values outside 1–10 are clamped rather than rejected,
-and so is anything that is not a number — a typo narrows the gauge instead of
-breaking the card.
-
-Below 1 the caps would overlap and the shape would stop being a stadium, which is
-why 1 is the floor rather than an arbitrary limit.
+and so is anything that is not a number.
 
 ### Outline colour
 
 Left unset, the outline follows whatever theme is active instead of being a fixed
-colour — it used to be hard-coded black, which is invisible on every dark theme. The
-card asks for, in order:
-
-```css
-var(--secondary-text-color, var(--primary-text-color, currentColor))
-```
-
-So it takes the theme's muted foreground if there is one, the plain foreground if
-not, and otherwise simply inherits the colour of the surrounding card text. Home
-Assistant defines the first two, and the last keeps the card sane outside it.
+colour. The card  takes the theme's muted foreground if there is one, the plain foreground if not, and otherwise simply inherits the colour of the surrounding card text. Home
+Assistant defines the first two, the last being present as a fallback.
 
 Setting `border_colour` overrides all of that with a literal colour.
 
 ### The two entities
 
-The card makes exactly one promise: **the gauge always follows `entity`.** Everything
-else is yours to decide.
+The gauge always follows `entity`. `secondary_entity` is displayed below `entity`, it has no effect on the gauge.
 
 Both entities are labelled with their own `friendly_name` and printed with their own
-`unit_of_measurement`, verbatim. The card appends nothing, assumes nothing and reads
-no meaning into either of them. `secondary_entity` is displayed and nothing more — it
-has no effect on the fill level.
+`unit_of_measurement`, verbatim. 
+
+The semantics of what you use the card for are yours to decide. The card appends nothing, assumes nothing and reads no meaning into either of them. 
 
 So a cistern with its pump works:
 
@@ -176,13 +164,22 @@ secondary_entity: sensor.pump_power # just displayed, shown in W
 max_level: 100
 ```
 
-…and so does turning the gauge into a crude bar graph for something that is not a
+So does turning the gauge into a simple bar graph for something that is not a
 level at all:
 
 ```yaml
 type: custom:liquid-level-gauge-card
-entity: sensor.flow_rate
+entity: sensor.pump_revolutions
+fill_colour: '#ff0000'
 max_level: 50
+```
+
+Nothing stops you from doing crazy stuff either:
+
+```yaml
+type: custom:liquid-level-gauge-card
+entity: sun.elevation
+max_level: 90
 ```
 
 ## Action Options

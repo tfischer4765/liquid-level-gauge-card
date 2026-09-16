@@ -25,7 +25,7 @@ views:
         secondary_entity: input_number.tank_flow_rate
         max_level: 100
         aspect_ratio: 5
-        fill_drop_colour: '#04ACFF'
+        fill_colour: '#04ACFF'
         border_colour: '#1B4965'
 
       # Edge cases worth eyeballing on every change.

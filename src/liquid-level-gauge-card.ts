@@ -32,7 +32,7 @@ console.info(
 
 // Read in whatever unit the entity reports; the card neither converts nor
 // assumes one.
-const DEFAULT_MAX_LEVEL = 40;
+const DEFAULT_MAX_LEVEL = 100;
 
 // Muted foreground if the theme offers one, plain foreground if not, and
 // finally whatever colour is inherited. Home Assistant defines the first two;
@@ -50,12 +50,12 @@ const MAX_ASPECT_RATIO = 10;
 // than in the translation files: getConfigForm is static and never sees `hass`,
 // so none of this can be localised anyway.
 const EDITOR_LABELS: Record<string, string> = {
-  entity: 'Entity (drives the gauge)',
+  entity: 'Main Entity',
   name: 'Card name',
-  max_level: 'Value at which the gauge is full',
-  aspect_ratio: 'Shape, height : width',
+  max_level: 'Maximum level',
+  aspect_ratio: 'Aspect ratio ',
   secondary_entity: 'Secondary entity (display only)',
-  fill_drop_colour: 'Fill colour',
+  fill_colour: 'Fill colour',
   border_colour: 'Outline colour',
   language: 'Language',
   show_warning: 'Show the warning placeholder',
@@ -63,12 +63,12 @@ const EDITOR_LABELS: Record<string, string> = {
 };
 
 const EDITOR_HELPERS: Record<string, string> = {
-  entity: 'The one thing this card promises: the gauge always follows this entity.',
-  max_level: "Read in the entity's own unit. Defaults to 40.",
+  entity: 'The gauge follows this entity. Shown with its own name and unit.',
+  max_level: "Read in the entity's own unit. Defaults to 100.",
   aspect_ratio: '1 is a circle, 10 a slim sight glass.',
-  secondary_entity: 'Shown with its own name and unit. Has no effect on the gauge.',
-  fill_drop_colour: 'Any CSS colour. Leave empty for the default blue.',
-  border_colour: 'Any CSS colour. Leave empty to follow the active theme.',
+  secondary_entity: 'Display only. Shown with its own name and unit.',
+  fill_colour: 'Any CSS colour. Defaults to blue.',
+  border_colour: 'Any CSS colour. Defaults to the active theme.',
 };
 
 @customElement('liquid-level-gauge-card')
@@ -81,27 +81,16 @@ export class LiquidLevelGaugeCard extends LitElement {
   public static getConfigForm(): Record<string, unknown> {
     return {
       schema: [
-        { name: 'entity', required: true, selector: { entity: {} } },
         { name: 'name', selector: { text: {} } },
-        {
-          type: 'grid',
-          title: 'Scale',
-          schema: [
-            { name: 'max_level', selector: { number: { min: 0, step: 'any', mode: 'box' } } },
-            {
-              name: 'aspect_ratio',
-              selector: {
-                number: { min: MIN_ASPECT_RATIO, max: MAX_ASPECT_RATIO, step: 0.1, mode: 'slider' },
-              },
-            },
-          ],
-        },
+        { name: 'entity', required: true, selector: { entity: {} } },
         { name: 'secondary_entity', selector: { entity: {} } },
+        { name: 'max_level', selector: { number: { min: 0, step: 'any', mode: 'box' } } },
+        { name: 'aspect_ratio', selector: { number: { min: MIN_ASPECT_RATIO, max: MAX_ASPECT_RATIO, step: 0.1, mode: 'slider' } } },
         {
           type: 'expandable',
           title: 'Appearance',
           schema: [
-            { name: 'fill_drop_colour', selector: { text: {} } },
+            { name: 'fill_colour', selector: { text: {} } },
             { name: 'border_colour', selector: { text: {} } },
           ],
         },
@@ -113,8 +102,6 @@ export class LiquidLevelGaugeCard extends LitElement {
               name: 'language',
               selector: { select: { mode: 'dropdown', options: CARD_LANGUAGES.filter(Boolean) } },
             },
-            { name: 'show_warning', selector: { boolean: {} } },
-            { name: 'show_error', selector: { boolean: {} } },
           ],
         },
       ],
@@ -263,9 +250,9 @@ export class LiquidLevelGaugeCard extends LitElement {
     // inherits whatever colour the surrounding card text has.
     const borderColour = this.config.border_colour || DEFAULT_BORDER_COLOUR
 
-    let fillDropColour = '#04ACFF'
-    if (this.config.fill_drop_colour) {
-      fillDropColour = this.config.fill_drop_colour
+    let fillColour = '#04ACFF'
+    if (this.config.fill_colour) {
+      fillColour = this.config.fill_colour
     }
 
     // The secondary entity carries no meaning for this card: it is read, labelled
@@ -303,7 +290,7 @@ export class LiquidLevelGaugeCard extends LitElement {
                       y=${gaugeTop}
                       width=${r(gaugeRadius * 2)}
                       height=${gaugeBoxHeight}
-                      style="fill:${fillDropColour};"
+                      style="fill:${fillColour};"
                       transform="translate(0, ${gaugeLevel})"
                     />
                   </g>
