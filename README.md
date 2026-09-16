@@ -4,42 +4,73 @@ A Lovelace card that shows a liquid fill level for [Home Assistant](https://home
 
 [![GitHub Release][releases-shield]][releases-link] [![GitHub Release Date][release-date-shield]][releases-link] [![GitHub Releases][latest-download-shield]][traffic-link] [![GitHub Releases][total-download-shield]][traffic-link]
 
-[![HACS Badge][hacs-shield]][hacs-link] [![HomeAssistant][home-assistant-shield]][home-assistant-link] [![License][license-shield]][license-link]
+[![HomeAssistant][home-assistant-shield]][home-assistant-link] [![License][license-shield]][license-link]
 
 ![Project Maintenance][maintenance-shield] [![GitHub Activity][activity-shield]][activity-link] [![Open bugs][bugs-shield]][bugs-link] [![Open enhancements][enhancements-shield]][enhancement-link]
 
-[![Community Forum][forum-shield]][forum-link]
 
 ## Installation
 
-### [HACS](https://hacs.xyz/) (Home Assistant Community Store)
+> **This card cannot be installed through HACS at the moment.** Install it manually
+> with the five steps below — it takes about two minutes and works exactly the same
+> afterwards. [Why not HACS?](#why-not-hacs) explains the reason.
 
-1. Go to HACS page on your Home Assistant instance
-1. Select `Frontend`
-1. Press add icon and search for `liquid-level-gauge`
-1. Select Liquid Level Gauge Card repo and install
-1. Force refresh the Home Assistant page (<kbd>Ctrl</kbd> + <kbd>F5</kbd>)
-1. Add liquid-level-gauge-card to your page
+1. Download **`liquid-level-gauge-card.js`** from the
+   [latest release](https://github.com/tfischer4765/liquid-level-gauge-card/releases/latest).
+   It is listed under *Assets*; right-click and *Save link as*.
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=tfischer4765&repository=liquid-level-gauge-card&category=plugin)
+2. Put that file into the **`www`** folder next to your `configuration.yaml`. If there
+   is no `www` folder yet, create one. The path should end up as
+   `config/www/liquid-level-gauge-card.js`.
 
-### Manual
+3. In Home Assistant, go to **Settings → Dashboards**, open the **⋮** menu in the top
+   right and choose **Resources**. If that entry is missing, switch on *Advanced Mode*
+   in your user profile first and look again.
 
-1. Download the 'liquid-level-gauge-card.js' from the latest [release](https://github.com/tfischer4765/liquid-level-gauge-card/releases) (with right click, save link as)
-1. Place the downloaded file on your Home Assistant machine in the `config/www` folder (when there is no `www` folder in the folder where your `configuration.yaml` file is, create it and place the file there)
-1. In Home Assistant go to `Configuration->Lovelace Dashboards->Resources` (When there is no `resources` tag on the `Lovelace Dashboard` page, enable advanced mode in your account settings, and retry this step)
-1. Add a new resource
-   1. Url = `/local/liquid-level-gauge-card.js`
-   1. Resource type = `module`
-1. Force refresh the Home Assistant page (<kbd>Ctrl</kbd> + <kbd>F5</kbd>)
-1. Add liquid-level-gauge-card to your page
+4. Add a resource:
+   - **URL:** `/local/liquid-level-gauge-card.js`
+   - **Type:** `JavaScript module`
+
+   `/local/` is how Home Assistant serves the `www` folder — the path is correct even
+   though the folder is called something else.
+
+5. Reload the page with a **hard refresh** (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>,
+   or <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on a Mac). The card now appears in
+   the card picker as *Liquid Level Gauge Card*.
+
+### Updating
+
+Replace the file in `config/www/` with the newer one and hard-refresh again. If the old
+version stubbornly persists, your browser is caching it: change the resource URL to
+`/local/liquid-level-gauge-card.js?v=2` (and `v=3` next time) to force a fresh copy.
+
+### Why not HACS?
+
+Nothing is broken on either side — two reasonable conventions simply fail to meet.
+
+HACS decides *which* version of a card to install by looking at the project's GitHub
+releases. It skips any release marked as a **pre-release**, unless you have already
+added the repository and switched on beta versions *for that repository*. That switch
+only exists once the repository has been added.
+
+Every release of this card is marked as a pre-release, because the card is not finished
+and its configuration options may still change. So HACS finds no release it is willing
+to use, falls back to looking for a ready-made file in the repository itself, does not
+find one there either — this project builds its file for each release rather than
+keeping a copy in the source tree — and declines the repository. The message it shows
+mentions the repository structure, which is why the real cause is easy to miss.
+
+When this card reaches **1.0.0** and gets a normal release, that obstacle disappears and
+HACS support can be revisited. Until then, the manual route above is the supported one,
+and it has no drawbacks beyond having to repeat it when you update.
 
 ## Using the card
 
 The card ships no editor of its own: it declares a form schema and Home Assistant
 renders the configuration UI natively, so the controls are the ones you know from
 built-in cards — a real entity picker, proper number fields, native switches. This
-needs **Home Assistant 2026.6 or newer**; `hacs.json` declares that minimum.
+needs **Home Assistant 2026.6 or newer**. On older versions the card itself still
+works; only the visual editor is unavailable, and you configure it in YAML instead.
 
 Actions (`tap_action`, `hold_action`, `double_tap_action`) are not part of the form
 and remain YAML-only.
@@ -75,7 +106,7 @@ entity: sensor.cistern_level
 | show_error        | boolean | **Optional** | Show what an error looks like for the card                               | `false`             |
 | show_warning      | boolean | **Optional** | Show what a warning looks like for the card                              | `false`             |
 | entity            | string  | **Required** | Home Assistant entity ID.                                                | `none`              |
-| max_level         | number  | **Optional** | Value at which the gauge counts as full, read in the displayed unit       | `40`                |
+| max_level         | number  | **Optional** | Value at which the gauge counts as full, in the entity's own unit        | `40`                |
 | aspect_ratio      | number  | **Optional** | Gauge shape as height:width, `1` a circle … `10` a slim tube             | `2`                 |
 | language          | string  | **Optional** | The 2 character that determines the language                             | `en`                |
 | secondary_entity  | string  | **Optional** | Second entity to display; shown with its own name and unit, nothing else | `none`              |
@@ -201,10 +232,12 @@ If you wish to add a language please follow these steps:
 
 ## Releasing
 
-The built bundle is not committed — `dist/` stays ignored, and HACS resolves the
-card through GitHub releases. That is why `hacs.json` sets `hide_default_branch`:
-without it HACS also evaluates the default branch, finds no `.js` file there and
-reports the repository structure as non-compliant.
+The built bundle is not committed — `dist/` stays ignored, and each release carries
+`liquid-level-gauge-card.js` as an attached asset. That release asset is what the
+installation instructions above point at.
+
+`hacs.json` is kept up to date even though HACS cannot currently install this card,
+so that nothing has to be reconstructed when that changes at 1.0.0.
 
 Cutting a release is a tag push:
 
@@ -220,9 +253,10 @@ published one whose asset never arrived.
 
 Two conventions are enforced by that workflow:
 
-- **`v0.*` is published as a pre-release**, so HACS only offers it to users who
-  enabled the beta switch. Drop the `0.` prefix when the card is ready to be a real
-  release.
+- **`v0.*` is published as a pre-release**, because the card is not finished. This is
+  also what keeps HACS from being able to install it — see
+  [Why not HACS?](#why-not-hacs). Drop the `0.` prefix when the card is ready to be a
+  real release.
 - **The tag's annotation becomes the release notes**, with the generated commit
   listing appended below it. Write the changelog in `git tag -a`, not in the web UI.
 
@@ -245,8 +279,6 @@ Clone and create a PR to help make the card even better.
 [latest-download-shield]: https://img.shields.io/github/downloads/tfischer4765/liquid-level-gauge-card/latest/total?style=flat-square&label=downloads%20latest%20release
 [total-download-shield]: https://img.shields.io/github/downloads/tfischer4765/liquid-level-gauge-card/total?style=flat-square&label=total%20views
 [traffic-link]: https://github.com/tfischer4765/liquid-level-gauge-card/graphs/traffic
-[hacs-shield]: https://img.shields.io/badge/HACS-Default-orange.svg?style=flat-square
-[hacs-link]: https://github.com/custom-components/hacs
 [home-assistant-shield]: https://img.shields.io/badge/Home%20Assistant-visual%20editor/yaml-green?style=flat-square
 [home-assistant-link]: https://www.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/tfischer4765/liquid-level-gauge-card.svg?style=flat-square
