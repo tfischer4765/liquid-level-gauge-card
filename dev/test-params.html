@@ -103,6 +103,15 @@
         ['aspect_ratio: 0.5 -> klemmt auf 1', 'Breite 182', { entity: 'sensor.tank', aspect_ratio: 0.5 }],
         ['aspect_ratio: 99 -> klemmt auf 10', 'Breite 18.2', { entity: 'sensor.tank', aspect_ratio: 99 }],
         ['aspect_ratio: "quark" -> Default', 'Breite 91', { entity: 'sensor.tank', aspect_ratio: 'quark' }],
+        ['entity_name ueberschreibt friendly_name', 'Zisterne statt Cistern Level',
+          { entity: 'sensor.percent', max_level: 100, entity_name: 'Zisterne' }],
+        ['secondary_entity_name ueberschreibt', 'Pumpe statt Pump Power',
+          { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.pump',
+            secondary_entity_name: 'Pumpe' }],
+        ['leerer Name = kein Override', 'faellt auf friendly_name zurueck',
+          { entity: 'sensor.percent', max_level: 100, entity_name: '' }],
+        ['Override ohne friendly_name', 'Override gewinnt trotzdem',
+          { entity: 'sensor.flowlh', max_level: 100, entity_name: 'Benannt' }],
         ['tap/hold/double_tap', 'rendert normal', {
           entity: 'sensor.tank',
           tap_action: { action: 'more-info' },
@@ -218,7 +227,8 @@
       // silently produce a control writing a key nothing consumes.
       {
         const KNOWN_KEYS = [
-          'entity', 'name', 'max_level', 'aspect_ratio', 'secondary_entity',
+          'entity', 'name', 'entity_name', 'max_level', 'aspect_ratio', 'secondary_entity',
+          'secondary_entity_name',
           'fill_colour', 'border_colour', 'language',
           'show_warning', 'show_error',
         ];

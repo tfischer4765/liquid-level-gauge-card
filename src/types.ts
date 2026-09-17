@@ -17,7 +17,9 @@ export interface LiquidLevelGaugeCardConfig extends LovelaceCardConfig {
   language?: string;
   max_level?: number;
   aspect_ratio?: number;
+  entity_name?: string;
   secondary_entity?: string;
+  secondary_entity_name?: string;
   fill_colour?: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;

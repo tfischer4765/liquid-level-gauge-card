@@ -143,10 +143,12 @@ entity: sensor.cistern_level
 | show_error        | boolean | **Optional** | Show what an error looks like for the card                               | `false`             |
 | show_warning      | boolean | **Optional** | Show what a warning looks like for the card                              | `false`             |
 | entity            | string  | **Required** | The `entity_id` of the main Home Assistant entity whose state you want the card to show.                                                | `none`              |
-| max_level         | number  | **Optional** | Value at which the gauge counts as full, in the entity's own unit        | `40`                |
+| max_level         | number  | **Optional** | Value at which the gauge counts as full, in the entity's own unit        | `100`               |
 | aspect_ratio      | number  | **Optional** | Gauge shape as `aspect_ratio`:width, `1` rendering as a circle … `10` as a slim tube             | `2`                 |
 | language          | string  | **Optional** | The 2 character that determines the language                             | `en`                |
+| entity_name       | string  | **Optional** | Label for `entity`; overrides its `friendly_name`                        | `none`              |
 | secondary_entity  | string  | **Optional** | Second entity to display; shown with its own name and unit, nothing else | `none`              |
+| secondary_entity_name | string | **Optional** | Label for `secondary_entity`; overrides its `friendly_name`          | `none`              |
 | tap_action        | object  | **Optional** | Action to take on tap                                                    | `action: more-info` |
 | hold_action       | object  | **Optional** | Action to take on hold                                                   | `none`              |
 | double_tap_action | object  | **Optional** | Action to take on double tap                                             | `none`              |
@@ -187,7 +189,8 @@ Setting `border_colour` overrides all of that with a literal colour.
 The gauge always follows `entity`. `secondary_entity` is displayed below `entity`, it has no effect on the gauge.
 
 Both entities are labelled with their own `friendly_name` and printed with their own
-`unit_of_measurement`, verbatim.
+`unit_of_measurement`, verbatim. `entity_name` and `secondary_entity_name` override the
+label for one card without renaming the entity everywhere else.
 
 The semantics of what you use the card for are yours to decide. The card appends nothing, assumes nothing and reads no meaning into either of them.
 

@@ -54,7 +54,9 @@ const EDITOR_LABELS: Record<string, string> = {
   name: 'Card name',
   max_level: 'Maximum level',
   aspect_ratio: 'Aspect ratio ',
+  entity_name: 'Label for the entity',
   secondary_entity: 'Secondary entity (display only)',
+  secondary_entity_name: 'Label for the secondary entity',
   fill_colour: 'Fill colour',
   border_colour: 'Outline colour',
   language: 'Language',
@@ -66,7 +68,9 @@ const EDITOR_HELPERS: Record<string, string> = {
   entity: 'The gauge follows this entity. Shown with its own name and unit.',
   max_level: "Read in the entity's own unit. Defaults to 100.",
   aspect_ratio: '1 is a circle, 10 a slim sight glass.',
+  entity_name: "Empty: the entity's own name.",
   secondary_entity: 'Display only. Shown with its own name and unit.',
+  secondary_entity_name: "Empty: the entity's own name.",
   fill_colour: 'Any CSS colour. Defaults to blue.',
   border_colour: 'Any CSS colour. Defaults to the active theme.',
 };
@@ -83,7 +87,9 @@ export class LiquidLevelGaugeCard extends LitElement {
       schema: [
         { name: 'name', selector: { text: {} } },
         { name: 'entity', required: true, selector: { entity: {} } },
+        { name: 'entity_name', selector: { text: {} } },
         { name: 'secondary_entity', selector: { entity: {} } },
+        { name: 'secondary_entity_name', selector: { text: {} } },
         { name: 'max_level', selector: { number: { min: 0, step: 'any', mode: 'box' } } },
         { name: 'aspect_ratio', selector: { number: { min: MIN_ASPECT_RATIO, max: MAX_ASPECT_RATIO, step: 0.1, mode: 'slider' } } },
         {
@@ -305,7 +311,9 @@ export class LiquidLevelGaugeCard extends LitElement {
           <div>
             <div>
               <p>
-                <span style="font-weight: bold;">${this._entityLabel(entityState, entityId)}</span><br/>
+                <span style="font-weight: bold;">
+                  ${this._entityLabel(this.config.entity_name, entityState, entityId)}
+                </span><br/>
                 ${hasValue || !entityState ? html`${stateValue || 0} ${unitOfMeasurement}` : entityState.state}
               </p>
             </div>
@@ -321,8 +329,15 @@ export class LiquidLevelGaugeCard extends LitElement {
   // Labels come from the entity, never from this card: the user decides what each
   // of the two entities means, so a fixed "Level" or "Flow" would only ever be
   // right by accident.
-  private _entityLabel(entityState: any | undefined, entityId: string | undefined): string {
-    return entityState?.attributes?.friendly_name ?? entityId ?? ''
+  // An explicit override wins, then the entity's own friendly_name, then its id.
+  // An empty override counts as unset, the way every other optional string here
+  // behaves.
+  private _entityLabel(
+    override: string | undefined,
+    entityState: any | undefined,
+    entityId: string | undefined,
+  ): string {
+    return override || entityState?.attributes?.friendly_name || entityId || ''
   }
 
   private _showSecondary(entityState: any | undefined, entityId: string | undefined): TemplateResult | void {
@@ -330,7 +345,9 @@ export class LiquidLevelGaugeCard extends LitElement {
     const value = parseFloat(entityState.state)
     const unit = entityState.attributes?.unit_of_measurement
     return html`<p>
-      <span style="font-weight: bold;">${this._entityLabel(entityState, entityId)}</span><br/>
+      <span style="font-weight: bold;">
+        ${this._entityLabel(this.config.secondary_entity_name, entityState, entityId)}
+      </span><br/>
       ${Number.isFinite(value) ? html`${value}${unit ? html` ${unit}` : ''}` : entityState.state}
     </p>`
   }
