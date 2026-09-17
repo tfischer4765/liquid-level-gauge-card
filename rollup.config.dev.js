@@ -4,6 +4,17 @@ import babel from 'rollup-plugin-babel';
 import serve from 'rollup-plugin-serve';
 import { terser } from 'rollup-plugin-terser';
 import json from '@rollup/plugin-json';
+import { sourceHash } from './scripts/source-hash.mjs';
+
+// See rollup.config.js -- same stamp, so a dev build identifies itself the way
+// a released one does.
+const stampSourceHash = () => ({
+  name: 'stamp-source-hash',
+  transform(code, id) {
+    if (!id.endsWith('const.ts')) return null;
+    return { code: code.replace('__SOURCE_HASH__', sourceHash().hash.slice(0, 12)), map: null };
+  },
+});
 
 export default {
   input: ['src/liquid-level-gauge-card.ts'],
@@ -17,6 +28,7 @@ export default {
     // See rollup.config.js: the default include pattern no longer matches, so
     // every .ts file would be filtered out and passed to rollup untranspiled.
     typescript({ include: ['src/**/*.ts'] }),
+    stampSourceHash(),
     json(),
     babel({
       exclude: 'node_modules/**',

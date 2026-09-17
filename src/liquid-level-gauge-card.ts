@@ -12,12 +12,12 @@ import {
 
 import type { LiquidLevelGaugeCardConfig } from './types';
 import { actionHandler } from './action-handler-directive';
-import { CARD_VERSION } from './const';
+import { CARD_VERSION, SOURCE_HASH } from './const';
 import { localize, CARD_LANGUAGES } from './localize/localize';
 
 /* eslint no-console: 0 */
 console.info(
-  `%c  LIQUID-LEVEL-GAUGE-CARD \n%c  ${localize('common.version')} ${CARD_VERSION}    `,
+  `%c  LIQUID-LEVEL-GAUGE-CARD \n%c  ${localize('common.version')} ${CARD_VERSION} · source ${SOURCE_HASH}    `,
   'color: orange; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray',
 );

@@ -274,6 +274,38 @@ and that the bundle registers an element matching that filename — a pair that 
 diverge silently and leaves the card installable but unusable as
 `custom:<name>`.
 
+### Identifying a build
+
+Every bundle carries a hash over the inputs it was built from, and prints it on load:
+
+```
+LIQUID-LEVEL-GAUGE-CARD
+Version 0.1.1 · source e0d40ef14c7b
+```
+
+Same hash, same code. Different hash, different code. That is the whole contract, and
+it answers the question a version number cannot: *is the card running in this browser
+the one I just built?*
+
+```bash
+node scripts/source-hash.mjs           # short hash
+node scripts/source-hash.mjs --files   # exactly what goes into it
+```
+
+It covers `src/`, `tsconfig.json`, `rollup.config.js`, `package.json` and
+`package-lock.json` — 21 files. Documentation, the dev rig and the workflows are
+excluded, since none of them reach the bundle.
+
+Git is deliberately not involved. Uncommitted edits change the hash by themselves, so
+no "dirty" marker is needed, and a tarball or a vendored copy hashes the same as a
+clone of the same content. The build carries no timestamp, so building the same inputs
+twice produces byte-identical output.
+
+`package-lock.json` is committed, and is part of the hash, because the dependencies are
+compiled *into* the bundle: the resolved version of `lit` is a property of the shipped
+artifact, not merely of the build environment. Without it the hash would still identify
+the source, but no longer the artifact.
+
 ## Thanks to
 
 - [@t1gr0u](https://github.com/t1gr0u) for [rain-gauge-card](https://github.com/t1gr0u/rain-gauge-card), which this card is forked from

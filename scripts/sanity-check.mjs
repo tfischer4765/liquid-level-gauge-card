@@ -16,6 +16,7 @@
 //   node scripts/sanity-check.mjs v0.2.0
 //
 import { readFileSync, statSync } from 'node:fs';
+import { sourceHash } from './source-hash.mjs';
 
 const tag = process.argv[2];
 const problems = [];
@@ -76,6 +77,18 @@ if (!filename) {
       checks.push(`  ok   bundle registers "${elementName}"`);
     } else {
       problems.push(`bundle does not mention the element name "${elementName}"`);
+    }
+
+    // An unsubstituted placeholder means the build skipped the stamping step,
+    // which would leave every artifact claiming to be the same one.
+    const { hash, files } = sourceHash();
+    const short = hash.slice(0, 12);
+    if (bundle.includes('__SOURCE_HASH__')) {
+      problems.push('bundle still contains the __SOURCE_HASH__ placeholder');
+    } else if (bundle.includes(short)) {
+      checks.push(`  ok   source hash ${short} stamped (${files} build inputs)`);
+    } else {
+      problems.push(`bundle does not carry the current source hash ${short} -- stale build?`);
     }
   }
 }
