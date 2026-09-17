@@ -23,26 +23,62 @@ A Lovelace card that shows a liquid fill level for [Home Assistant](https://home
    is no `www` folder yet, create one. The path should end up as
    `config/www/liquid-level-gauge-card.js`.
 
+   **If you had to create `www` just now, restart Home Assistant.**
+
 3. In Home Assistant, go to **Settings → Dashboards**, open the **⋮** menu in the top
    right and choose **Resources**. If that entry is missing, switch on *Advanced Mode*
    in your user profile first and look again.
 
 4. Add a resource:
    - **URL:** `/local/liquid-level-gauge-card.js`
-   - **Type:** `JavaScript module`
+   - **Type:** **JavaScript module** — *not* the plain JavaScript option
 
    `/local/` is how Home Assistant serves the `www` folder — the path is correct even
    though the folder is called something else.
 
+   If you are configuring resources in YAML, this is the correct entry:
+
+   ```yaml
+   lovelace:
+     resource_mode: yaml
+     resources:
+       - url: /local/liquid-level-gauge-card.js
+         type: module
+   ```
+
+   After editing the YAML, apply it with
+   **⋮ → Reload resources** — no restart needed.
+
 5. Reload the page with a **hard refresh** (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>,
    or <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on a Mac). The card now appears in
    the card picker as *Liquid Level Gauge Card*.
+
+### Troubleshooting
+
+Check that the URL `http://<your-home-assistant>/local/liquid-level-gauge-card.js` presents you with the javascript source.
+
+- *JavaScript text appears* → the file is served correctly, carry on below.
+- *404* → Home Assistant does not know the path. Restart it if you created `www`
+  recently; otherwise the file is not under `config/www/`.
+
+Check the browser console (F12) after loading a dashboard.
+
+- *"Cannot use import statement outside a module"* or *"import declarations may only
+  appear at top level of a module"* → the resource type is wrong. See step 4.
+- *A line reading `LIQUID-LEVEL-GAUGE-CARD · Version … · source …`* → the card loaded successfully and the problem is elsewhere.
+- *Nothing at all from this card* → the resource is not registered, or the page was
+  not fully reloaded.
+
+That `source` value is a hash of the code the bundle was built from. If you ever wonder
+whether a browser is really running the file you just put in place, compare it: same
+hash, same code.
 
 ### Updating
 
 Replace the file in `config/www/` with the newer one and hard-refresh again. If the old
 version stubbornly persists, your browser is caching it: change the resource URL to
 `/local/liquid-level-gauge-card.js?v=2` (and `v=3` next time) to force a fresh copy.
+The `source` hash in the console tells you which one actually took effect.
 
 ### Why not HACS?
 
@@ -151,9 +187,9 @@ Setting `border_colour` overrides all of that with a literal colour.
 The gauge always follows `entity`. `secondary_entity` is displayed below `entity`, it has no effect on the gauge.
 
 Both entities are labelled with their own `friendly_name` and printed with their own
-`unit_of_measurement`, verbatim. 
+`unit_of_measurement`, verbatim.
 
-The semantics of what you use the card for are yours to decide. The card appends nothing, assumes nothing and reads no meaning into either of them. 
+The semantics of what you use the card for are yours to decide. The card appends nothing, assumes nothing and reads no meaning into either of them.
 
 So a cistern with its pump works:
 
