@@ -7,6 +7,7 @@ import {
   hasAction,
   ActionHandlerEvent,
   handleAction,
+  formatNumber,
   getLovelace,
 } from 'custom-card-helpers'; // This is a community maintained npm module with common helper functions/types. https://github.com/custom-cards/custom-card-helpers
 
@@ -314,7 +315,9 @@ export class LiquidLevelGaugeCard extends LitElement {
                 <span style="font-weight: bold;">
                   ${this._entityLabel(this.config.entity_name, entityState, entityId)}
                 </span><br/>
-                ${hasValue || !entityState ? html`${stateValue || 0} ${unitOfMeasurement}` : entityState.state}
+                ${hasValue || !entityState
+                  ? html`${this._formatValue(entityId, entityState, stateValue || 0)} ${unitOfMeasurement}`
+                  : entityState.state}
               </p>
             </div>
             <div>
@@ -329,6 +332,40 @@ export class LiquidLevelGaugeCard extends LitElement {
   // Labels come from the entity, never from this card: the user decides what each
   // of the two entities means, so a fixed "Level" or "Flow" would only ever be
   // right by accident.
+  // Home Assistant keeps display precision in the entity registry, not in the
+  // state: the state carries the raw value, which is how a sensor limited to two
+  // decimals still arrives as 2399.673828125. Printing it unformatted also threw
+  // away the user's locale, so a German installation saw 2399.67 where it
+  // expects 2.399,67.
+  //
+  // The registry entry wins, as it does in Home Assistant's own formatting;
+  // suggested_display_precision is the fallback, which is what ESPHome's
+  // accuracy_decimals ends up in.
+  private _formatValue(entityId: string | undefined, entityState: any | undefined, value: number): string {
+    const registry = (this.hass as any).entities?.[entityId ?? ''];
+    const precision = registry?.display_precision ?? entityState?.attributes?.suggested_display_precision;
+
+    // Which input to hand formatNumber depends on whether a precision is known,
+    // because the two paths inside it behave differently:
+    //
+    //   - given a string and no fraction digits, it derives the decimals from the
+    //     string itself. That is what Home Assistant does, so an entity with no
+    //     precision configured looks the same here as everywhere else.
+    //   - given a number, it caps at two decimals unless told otherwise.
+    //
+    // The catch is that its check reads `!options.maximumFractionDigits`, a falsy
+    // test, so a precision of 0 is discarded on the string path and the full
+    // value comes back. Passing the number whenever a precision is known avoids
+    // that branch entirely.
+    if (precision == null) {
+      return formatNumber(entityState?.state ?? value, this.hass.locale);
+    }
+    return formatNumber(value, this.hass.locale, {
+      maximumFractionDigits: precision,
+      minimumFractionDigits: precision,
+    });
+  }
+
   // An explicit override wins, then the entity's own friendly_name, then its id.
   // An empty override counts as unset, the way every other optional string here
   // behaves.
@@ -348,7 +385,9 @@ export class LiquidLevelGaugeCard extends LitElement {
       <span style="font-weight: bold;">
         ${this._entityLabel(this.config.secondary_entity_name, entityState, entityId)}
       </span><br/>
-      ${Number.isFinite(value) ? html`${value}${unit ? html` ${unit}` : ''}` : entityState.state}
+      ${Number.isFinite(value)
+        ? html`${this._formatValue(entityId, entityState, value)}${unit ? html` ${unit}` : ''}`
+        : entityState.state}
     </p>`
   }
 

@@ -60,10 +60,20 @@
           'sensor.nounit':      { entity_id: 'sensor.nounit',      state: '7',           attributes: { friendly_name: 'Bare Number' } },
           'sensor.unknown':     { entity_id: 'sensor.unknown',     state: 'unknown',     attributes: { friendly_name: 'Cistern Level' } },
           'sensor.flowlh':      { entity_id: 'sensor.flowlh',      state: '12',          attributes: { unit_of_measurement: 'L/h' } },
+          'sensor.raw':         { entity_id: 'sensor.raw',         state: '2399.673828125', attributes: { unit_of_measurement: 'L', friendly_name: 'Roh' } },
+          'sensor.suggested':   { entity_id: 'sensor.suggested',   state: '2399.673828125', attributes: { unit_of_measurement: 'L', friendly_name: 'Vorschlag', suggested_display_precision: 2 } },
+          'sensor.registry2':   { entity_id: 'sensor.registry2',   state: '2399.673828125', attributes: { unit_of_measurement: 'L', friendly_name: 'Registry2' } },
+          'sensor.registry0':   { entity_id: 'sensor.registry0',   state: '2399.673828125', attributes: { unit_of_measurement: 'L', friendly_name: 'Registry0', suggested_display_precision: 2 } },
           'sensor.negative':    { entity_id: 'sensor.negative',    state: '-5',          attributes: { friendly_name: 'Cistern Level' } },
         },
         localize: (k) => k,
         language: 'en',
+        locale: { language: 'en', number_format: 'language' },
+        // Entity-Registry: hier liegt display_precision, NICHT im State
+        entities: {
+          'sensor.registry2': { display_precision: 2 },
+          'sensor.registry0': { display_precision: 0 },
+        },
         callService: () => {},
       };
 
@@ -112,6 +122,11 @@
           { entity: 'sensor.percent', max_level: 100, entity_name: '' }],
         ['Override ohne friendly_name', 'Override gewinnt trotzdem',
           { entity: 'sensor.flowlh', max_level: 100, entity_name: 'Benannt' }],
+        ['Praezision: keine Angabe', 'unveraendert, aber lokalisiert', { entity: 'sensor.raw', max_level: 5000 }],
+        ['Praezision: suggested_display_precision 2', 'erwartet 2,399.67', { entity: 'sensor.suggested', max_level: 5000 }],
+        ['Praezision: Registry 2', 'erwartet 2,399.67', { entity: 'sensor.registry2', max_level: 5000 }],
+        ['Praezision: Registry schlaegt suggested', 'Registry 0 gewinnt gegen suggested 2', { entity: 'sensor.registry0', max_level: 5000 }],
+        ['Praezision auch fuer 2. Entity', 'erwartet 2,399.67', { entity: 'sensor.percent', max_level: 100, secondary_entity: 'sensor.suggested' }],
         ['tap/hold/double_tap', 'rendert normal', {
           entity: 'sensor.tank',
           tap_action: { action: 'more-info' },

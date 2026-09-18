@@ -161,6 +161,12 @@ reports no unit is shown as a bare number rather than being given an invented on
 
 `max_level` is read in that same unit. The card performs no conversion of any kind.
 
+Decimal places and number format come from Home Assistant too. The card uses the
+entity's display precision and the locale, so values look the way they do elsewhere in
+your dashboard. Seeing something like `2399.673828125`? The entity has no display
+precision set — fix it under **Settings → Devices & services → Entities**, pick the
+entity, then **Display precision**. That applies everywhere, not just here.
+
 ### Shape
 
 `aspect_ratio` is the gauge's height divided by its width:
