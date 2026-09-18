@@ -275,7 +275,24 @@ installation instructions above point at.
 `hacs.json` is kept up to date even though HACS cannot currently install this card,
 so that nothing has to be reconstructed when that changes at 1.0.0.
 
-Cutting a release is a tag push:
+### Versioning
+
+`major.minor.patch`. Incrementing a position resets every lower one to zero.
+
+| Position | Rule |
+| -------- | ---- |
+| `major`  | Never automatic. Decided by the maintainer. `1.0.0` additionally means the card is considered good enough. |
+| `minor`  | **Must** change on a breaking change. **May** change for a new feature. |
+| `patch`  | **Must** change whenever behaviour changes — a bugfix, a changed default. |
+
+The rules are floors, not ceilings; a larger bump is always the maintainer's call.
+`v0.*` is published as a pre-release, which is why HACS cannot install it — see
+[Why not HACS?](#why-not-hacs).
+
+### Cutting a release
+
+A tag push, but bump the version first — the sanity check refuses a tag that
+disagrees with `package.json` and `CARD_VERSION`, and no release is created:
 
 ```bash
 git tag -a v0.1.0 -m "What changed in this version"

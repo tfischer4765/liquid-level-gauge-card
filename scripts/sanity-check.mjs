@@ -16,6 +16,7 @@
 //   node scripts/sanity-check.mjs v0.2.0
 //
 import { readFileSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { sourceHash } from './source-hash.mjs';
 
 const tag = process.argv[2];
@@ -47,6 +48,18 @@ if (!cardVersion) {
 if (tag) {
   // v1.2.3 and v1.0.0-rc.1 both map to the version without the leading v.
   check('tag matches package.json version', tag.replace(/^v/, ''), pkg.version);
+
+  // The only versioning rule that can be mechanically checked: a tag has to be
+  // greater than every tag before it. Whether a change deserves a minor or a
+  // patch is a judgement call and stays one.
+  const previous = latestTag(tag);
+  if (previous) {
+    if (compareVersions(tag, previous) > 0) {
+      checks.push(`  ok   ${tag} is newer than ${previous}`);
+    } else {
+      problems.push(`${tag} is not greater than the existing tag ${previous}`);
+    }
+  }
 }
 
 // --- the bundle -------------------------------------------------------------
@@ -90,6 +103,32 @@ if (!filename) {
     } else {
       problems.push(`bundle does not carry the current source hash ${short} -- stale build?`);
     }
+  }
+}
+
+// --- helpers ----------------------------------------------------------------
+// Numeric per position, so v0.10.0 sorts above v0.9.0 -- which a string compare
+// gets wrong, and which is exactly the mistake worth catching.
+function compareVersions(a, b) {
+  const parts = (v) => v.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
+  const [x, y] = [parts(a), parts(b)];
+  for (let i = 0; i < 3; i++) {
+    if (x[i] !== y[i]) return x[i] - y[i];
+  }
+  return 0;
+}
+
+// Git is only consulted here, and only to find the previous tag. Outside a
+// checkout the check is skipped rather than failing.
+function latestTag(exclude) {
+  try {
+    const tags = execFileSync('git', ['tag', '--list', 'v*'], { encoding: 'utf8' })
+      .split('\n')
+      .map((t) => t.trim())
+      .filter((t) => t && t !== exclude);
+    return tags.sort(compareVersions).pop() ?? null;
+  } catch {
+    return null;
   }
 }
 
