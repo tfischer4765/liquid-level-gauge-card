@@ -1,4 +1,4 @@
-export const CARD_VERSION = '0.2.0';
+export const CARD_VERSION = '0.2.1';
 
 // Replaced during the build with a hash over everything that influences the
 // bundle -- see scripts/source-hash.mjs. Two cards reporting the same hash were

@@ -51,8 +51,21 @@ const plugins = [
   !dev && terser(),
 ];
 
+// @formatjs/intl-utils, pulled in by custom-card-helpers, ships TypeScript's
+// `var __assign = (this && this.__assign) || function () {…}` helpers at module
+// top level. In an ES module `this` is undefined, so rollup rewrites it and
+// warns -- but falling through to the inline implementation is precisely what
+// that idiom is for, and the result works. Silenced for dependencies only, so a
+// genuine `this` problem in our own source still gets reported.
+const quietVendorThisWarnings = (warning, warn) => {
+  const file = warning.id ?? warning.loc?.file ?? '';
+  if (warning.code === 'THIS_IS_UNDEFINED' && file.includes('node_modules')) return;
+  warn(warning);
+};
+
 export default [
   {
+    onwarn: quietVendorThisWarnings,
     input: 'src/liquid-level-gauge-card.ts',
     output: {
       dir: 'dist',

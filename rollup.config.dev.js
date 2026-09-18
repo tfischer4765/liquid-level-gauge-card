@@ -16,7 +16,15 @@ const stampSourceHash = () => ({
   },
 });
 
+// See rollup.config.js for why this is silenced and only for dependencies.
+const quietVendorThisWarnings = (warning, warn) => {
+  const file = warning.id ?? warning.loc?.file ?? '';
+  if (warning.code === 'THIS_IS_UNDEFINED' && file.includes('node_modules')) return;
+  warn(warning);
+};
+
 export default {
+  onwarn: quietVendorThisWarnings,
   input: ['src/liquid-level-gauge-card.ts'],
   output: {
     dir: './dist',
