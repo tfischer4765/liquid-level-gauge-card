@@ -48,9 +48,25 @@ jobs:
         run: |
           # 0.x is not a release by convention -- mark it as a pre-release so
           # HACS only offers it to users who enabled the beta switch.
+          # HACS reads nothing but this flag, so it decides who gets a release.
+          # First match wins, and the order is the point:
+          #
+          #   v0.*    not finished, by convention -- candidates included. A
+          #           v0.9.0-rc.1 becomes v0.9.0, not 1.0, so it is no more
+          #           ready for general use than the version it stands for.
+          #   *-rc*   a release candidate: believed ready, goes to everyone.
+          #   *-*     alpha, beta, and anything unrecognised. Withholding is the
+          #           safe direction: a typo like -beat.1 stays with testers
+          #           instead of reaching every installation.
+          #
+          # No hyphen at all falls through to a normal release. Build metadata
+          # (v1.0.0+build.5) uses + and is correctly not treated as a
+          # pre-release.
           FLAGS=""
           case "$TAG" in
-            v0.*) FLAGS="--prerelease" ;;
+            v0.*)  FLAGS="--prerelease" ;;
+            *-rc*) FLAGS="" ;;
+            *-*)   FLAGS="--prerelease" ;;
           esac
 
           # Derived rather than hard-coded, so the asset name cannot drift away

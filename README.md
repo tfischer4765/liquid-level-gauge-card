@@ -259,7 +259,24 @@ so that nothing has to be reconstructed when that changes at 1.0.0.
 | `patch`  | **Must** change whenever behaviour changes — a bugfix, a changed default. |
 
 The rules are floors, not ceilings; a larger bump is always the maintainer's call.
-`v0.*` is published as a pre-release, which is why HACS cannot install it — see
+
+### Who gets a release
+
+A GitHub pre-release is invisible to HACS unless a user has switched on beta
+versions for this repository, so the tag decides the audience:
+
+| Tag | Audience |
+| --- | -------- |
+| `v0.*` — including `v0.9.0-rc.1` | testers only |
+| `-alpha*`, `-beta*` | testers only |
+| `-rc*` from `1.0.0` on | everyone |
+| no suffix from `1.0.0` on | everyone |
+
+`v0.*` outranks `-rc*`: a `v0.9.0-rc.1` becomes `v0.9.0`, not `1.0`, so it is no
+readier for general use than the version it stands for. Any suffix that is not
+recognised is treated as a pre-release, so a typo like `-beat.1` stays with testers.
+
+This is also why HACS cannot install the card today — see
 [Why not HACS?](#why-not-hacs).
 
 ### Cutting a release
