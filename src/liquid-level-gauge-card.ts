@@ -8,7 +8,6 @@ import {
   ActionHandlerEvent,
   handleAction,
   formatNumber,
-  getLovelace,
 } from 'custom-card-helpers'; // This is a community maintained npm module with common helper functions/types. https://github.com/custom-cards/custom-card-helpers
 
 import type { LiquidLevelGaugeCardConfig } from './types';
@@ -46,6 +45,22 @@ const DEFAULT_BORDER_COLOUR =
 const DEFAULT_ASPECT_RATIO = 2;
 const MIN_ASPECT_RATIO = 1;
 const MAX_ASPECT_RATIO = 10;
+
+// The outline is stroked centred on the path, so half of its 4 units falls
+// outside. The viewBox is padded by that much plus a little slack, otherwise a
+// viewBox fitted to the gauge would clip its own outline.
+const STROKE_PAD = 3;
+
+// The gauge is sized by height, not width. Width follows from the viewBox, which
+// is fitted to the shape, so a slim gauge takes up slim space instead of sitting
+// in a square box that is mostly empty -- and a card made wider gets more room
+// for its text rather than a gauge that grows without bound.
+const GAUGE_HEIGHT_PX = 180;
+
+// Where the content row stops growing. Beyond this a card is wider than the
+// gauge and two short values can fill, so the surplus is left blank on the right
+// instead of pulling the two blocks apart across the whole width.
+const CONTENT_MAX_WIDTH_PX = 500;
 
 // Labels and help texts for the visual editor. Kept next to the schema rather
 // than in the translation files: getConfigForm is static and never sees `hass`,
@@ -148,9 +163,6 @@ export class LiquidLevelGaugeCard extends LitElement {
       throw new Error(localize('common.invalid_configuration'));
     }
 
-    if (config.test_gui) {
-      getLovelace().setEditMode(true);
-    }
 
     this.config = {
       name: 'Liquid Level Gauge',
@@ -192,6 +204,14 @@ export class LiquidLevelGaugeCard extends LitElement {
 
     const entityId = this.config.entity;
     const entityState = entityId ? this.hass.states[entityId] : undefined;
+
+    // A configured entity that does not exist -- a typo, a rename, an
+    // integration that has not loaded -- used to render an empty gauge reading
+    // zero with no label, which looks like a working card showing a real value.
+    if (entityId && !entityState) {
+      return this._showWarning(`Entity not available: ${entityId}`);
+    }
+
     const stateValue: number = entityState ? parseFloat(entityState.state) : 0;
 
     // States like `unavailable` and `unknown` are normal in Home Assistant, not
@@ -280,49 +300,49 @@ export class LiquidLevelGaugeCard extends LitElement {
         tabindex="0"
         .label=${`Liquid Level Gauge: ${this.config.entity || 'No Entity Defined'}`}
       >
-        <div style="display: flex;">
-          <div style="width: 50%; padding-left: 30px;">
-            <div id="banner">
-              <div>
-                <svg version="1.1" id="logo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="80%" viewBox="0 0 200 200">
-                  <defs>
-                    <clipPath id="gauge">
-                      <path d=${gaugePath}></path>
-                    </clipPath>
-                  </defs>
+        <div class="content">
+          <div class="gauge-wrap">
+          <svg
+            class="gauge"
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label=${this._entityLabel(this.config.entity_name, entityState, entityId)}
+            viewBox=${`${r(gaugeLeft - STROKE_PAD)} ${gaugeTop - STROKE_PAD} ` +
+              `${r(gaugeRadius * 2 + STROKE_PAD * 2)} ${gaugeBoxHeight + STROKE_PAD * 2}`}
+          >
+            <defs>
+              <clipPath id="gauge">
+                <path d=${gaugePath}></path>
+              </clipPath>
+            </defs>
 
-                  <g clip-path="url(#gauge)">
-                    <rect
-                      x=${r(gaugeLeft)}
-                      y=${gaugeTop}
-                      width=${r(gaugeRadius * 2)}
-                      height=${gaugeBoxHeight}
-                      style="fill:${fillColour};"
-                      transform="translate(0, ${gaugeLevel})"
-                    />
-                  </g>
-                  <path
-                    d=${gaugePath}
-                    style="fill:none; stroke:${borderColour}; stroke-width:4; stroke-miterlimit:5;"
-                  ></path>
-                </svg>
-              </div>
-            </div>
+            <g clip-path="url(#gauge)">
+              <rect
+                x=${r(gaugeLeft)}
+                y=${gaugeTop}
+                width=${r(gaugeRadius * 2)}
+                height=${gaugeBoxHeight}
+                style="fill:${fillColour};"
+                transform="translate(0, ${gaugeLevel})"
+              />
+            </g>
+            <path
+              d=${gaugePath}
+              style="fill:none; stroke:${borderColour}; stroke-width:4; stroke-miterlimit:5;"
+            ></path>
+          </svg>
           </div>
-          <div>
-            <div>
-              <p>
-                <span style="font-weight: bold;">
-                  ${this._entityLabel(this.config.entity_name, entityState, entityId)}
-                </span><br/>
-                ${hasValue || !entityState
-                  ? html`${this._formatValue(entityId, entityState, stateValue || 0)} ${unitOfMeasurement}`
-                  : entityState.state}
-              </p>
-            </div>
-            <div>
-              ${this._showSecondary(secondaryEntityState, secondaryEntityId)}
-            </div>
+
+          <div class="values">
+            <p>
+              <span class="label">
+                ${this._entityLabel(this.config.entity_name, entityState, entityId)}
+              </span><br/>
+              ${hasValue || !entityState
+                ? html`${this._formatValue(entityId, entityState, stateValue || 0)} ${unitOfMeasurement}`
+                : entityState.state}
+            </p>
+            ${this._showSecondary(secondaryEntityState, secondaryEntityId)}
           </div>
         </div>
       </ha-card>
@@ -412,8 +432,85 @@ export class LiquidLevelGaugeCard extends LitElement {
     return html` ${errorCard} `;
   }
 
+  // Rough card height in Home Assistant's ~50px units, used to balance masonry
+  // columns. Gauge plus header plus padding.
+  public getCardSize(): number {
+    return Math.ceil((GAUGE_HEIGHT_PX + 70) / 50);
+  }
+
   // https://lit.dev/docs/components/styles/
   static get styles(): CSSResultGroup {
-    return css``;
+    return css`
+      :host {
+        display: block;
+      }
+
+      /* The two blocks share the width proportionally, so the card is filled
+         rather than hugging its left edge. max-width stops the row growing once
+         the card gets wider than the content can use: the blocks stay
+         left-aligned and the surplus is left blank on the right, rather than
+         being stretched across a metre of dashboard.
+
+         wrap plus min-width: 0 handles the other end: on a narrow card the text
+         shrinks first and drops below the gauge only when it genuinely no longer
+         fits. */
+      .content {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 0 16px 16px;
+        max-width: ${CONTENT_MAX_WIDTH_PX}px;
+      }
+
+      /* No min-width: 0 here on purpose. The default min-content floor is the
+         gauge's own width, so the row runs out of space and wraps instead of
+         squeezing the gauge down to a sliver. Growing rather than fixed at 40%
+         so that once wrapped, the gauge centres across the whole line instead of
+         hugging the left. */
+      .gauge-wrap {
+        flex: 1 1 40%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .gauge {
+        height: ${GAUGE_HEIGHT_PX}px;
+        width: auto;
+      }
+
+      /* A floor rather than 0: it gives the row something to break against, so a
+         narrow card stacks the text under the gauge. overflow-wrap catches the
+         one case that floor cannot, a single unbreakable word. */
+      .values {
+        flex: 1 1 50%;
+        min-width: 8ch;
+        overflow-wrap: anywhere;
+      }
+
+      .values p {
+        margin: 0 0 12px;
+      }
+
+      .values p:last-child {
+        margin-bottom: 0;
+      }
+
+      .label {
+        font-weight: bold;
+      }
+
+      /* The point of a level gauge is watching it move. Without this the fill
+         jumps between values. */
+      rect {
+        transition: transform 0.6s ease-in-out;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        rect {
+          transition: none;
+        }
+      }
+    `;
   }
 }

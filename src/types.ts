@@ -12,7 +12,6 @@ export interface LiquidLevelGaugeCardConfig extends LovelaceCardConfig {
   border_colour?: string;
   show_warning?: boolean;
   show_error?: boolean;
-  test_gui?: boolean;
   entity?: string;
   language?: string;
   max_level?: number;

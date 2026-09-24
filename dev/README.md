@@ -63,6 +63,12 @@ The page also exposes `window.__RESULTS__` and a hidden `<pre id="results">` wit
 the rendered text, fill transform and colour per case — that is what makes the
 level maths checkable rather than merely eyeballable.
 
+## Layout check
+
+`layout-check.html` renders the card at several widths, so a CSS change that
+survives one width but breaks another shows up. Same procedure as the parameter
+matrix: `cp dev/layout-check.html dist/`, then open it on the dev server.
+
 ## Why it is built this way
 
 The point of these choices is that a productive HA instance on the same LAN is
