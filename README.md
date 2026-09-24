@@ -11,9 +11,22 @@ A Lovelace card that shows a liquid fill level for [Home Assistant](https://home
 
 ## Installation
 
-> **This card cannot be installed through HACS at the moment.** Install it manually
-> with the five steps below — it takes about two minutes and works exactly the same
-> afterwards. [Why not HACS?](#why-not-hacs) explains the reason.
+### HACS
+
+The card is not in the HACS default store, so add it as a custom repository:
+
+1. HACS → **⋮** (top right) → **Custom repositories**
+2. Repository: `https://github.com/tfischer4765/liquid-level-gauge-card`
+   Type: **Dashboard**
+3. **Add**, then find *Liquid Level Gauge Card* in HACS and download it
+4. Hard refresh (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>, <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> on a Mac)
+
+HACS registers the dashboard resource itself; there is nothing to add by hand.
+
+Alpha and beta versions are only offered if you enable beta versions for this
+repository in HACS. Release candidates and final releases are offered to everyone.
+
+### Manual
 
 1. Download **`liquid-level-gauge-card.js`** from the
    [latest release](https://github.com/tfischer4765/liquid-level-gauge-card/releases/latest).
@@ -79,26 +92,6 @@ Replace the file in `config/www/` with the newer one and hard-refresh again. If 
 version stubbornly persists, your browser is caching it: change the resource URL to
 `/local/liquid-level-gauge-card.js?v=2` (and `v=3` next time) to force a fresh copy.
 The `source` hash in the console tells you which one actually took effect.
-
-### Why not HACS?
-
-Nothing is broken on either side — two reasonable conventions simply fail to meet.
-
-HACS decides *which* version of a card to install by looking at the project's GitHub
-releases. It skips any release marked as a **pre-release**, unless you have already
-added the repository and switched on beta versions *for that repository*. That switch
-only exists once the repository has been added.
-
-Every release of this card is marked as a pre-release, because the card is not finished
-and its configuration options may still change. So HACS finds no release it is willing
-to use, falls back to looking for a ready-made file in the repository itself, does not
-find one there either — this project builds its file for each release rather than
-keeping a copy in the source tree — and declines the repository. The message it shows
-mentions the repository structure, which is why the real cause is easy to miss.
-
-When this card reaches **1.0.0** and gets a normal release, that obstacle disappears and
-HACS support can be revisited. Until then, the manual route above is the supported one,
-and it has no drawbacks beyond having to repeat it when you update.
 
 ## Using the card
 
@@ -245,9 +238,6 @@ The built bundle is not committed — `dist/` stays ignored, and each release ca
 `liquid-level-gauge-card.js` as an attached asset. That release asset is what the
 installation instructions above point at.
 
-`hacs.json` is kept up to date even though HACS cannot currently install this card,
-so that nothing has to be reconstructed when that changes at 1.0.0.
-
 ### Versioning
 
 `major.minor.patch`. Incrementing a position resets every lower one to zero.
@@ -276,9 +266,6 @@ versions for this repository, so the tag decides the audience:
 readier for general use than the version it stands for. Any suffix that is not
 recognised is treated as a pre-release, so a typo like `-beat.1` stays with testers.
 
-This is also why HACS cannot install the card today — see
-[Why not HACS?](#why-not-hacs).
-
 ### Cutting a release
 
 A tag push, but bump the version first — the sanity check refuses a tag that
@@ -296,10 +283,7 @@ published one whose asset never arrived.
 
 Two conventions are enforced by that workflow:
 
-- **`v0.*` is published as a pre-release**, because the card is not finished. This is
-  also what keeps HACS from being able to install it — see
-  [Why not HACS?](#why-not-hacs). Drop the `0.` prefix when the card is ready to be a
-  real release.
+- **The tag decides who gets the release** — see [Who gets a release](#who-gets-a-release).
 - **The tag's annotation becomes the release notes**, with the generated commit
   listing appended below it. Write the changelog in `git tag -a`, not in the web UI.
 
