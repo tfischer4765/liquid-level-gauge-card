@@ -13,11 +13,10 @@ import {
 import type { LiquidLevelGaugeCardConfig } from './types';
 import { actionHandler } from './action-handler-directive';
 import { CARD_VERSION, SOURCE_HASH } from './const';
-import { localize, CARD_LANGUAGES } from './localize/localize';
 
 /* eslint no-console: 0 */
 console.info(
-  `%c  LIQUID-LEVEL-GAUGE-CARD \n%c  ${localize('common.version')} ${CARD_VERSION} · source ${SOURCE_HASH}    `,
+  `%c  LIQUID-LEVEL-GAUGE-CARD \n%c  Version ${CARD_VERSION} · source ${SOURCE_HASH}    `,
   'color: orange; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray',
 );
@@ -75,7 +74,6 @@ const EDITOR_LABELS: Record<string, string> = {
   secondary_entity_name: 'Label for the secondary entity',
   fill_colour: 'Fill colour',
   border_colour: 'Outline colour',
-  language: 'Language',
   show_warning: 'Show the warning placeholder',
   show_error: 'Show the error placeholder',
 };
@@ -116,16 +114,6 @@ export class LiquidLevelGaugeCard extends LitElement {
             { name: 'border_colour', selector: { text: {} } },
           ],
         },
-        {
-          type: 'expandable',
-          title: 'Advanced',
-          schema: [
-            {
-              name: 'language',
-              selector: { select: { mode: 'dropdown', options: CARD_LANGUAGES.filter(Boolean) } },
-            },
-          ],
-        },
       ],
       // Must return a NON-EMPTY string for every entry, containers included.
       // Home Assistant chains with `||`, not `??`:
@@ -160,7 +148,7 @@ export class LiquidLevelGaugeCard extends LitElement {
   // https://lit.dev/docs/components/properties/#accessors-custom
   public setConfig(config: LiquidLevelGaugeCardConfig): void {
     if (!config) {
-      throw new Error(localize('common.invalid_configuration'));
+      throw new Error('Invalid configuration');
     }
 
 
@@ -195,11 +183,11 @@ export class LiquidLevelGaugeCard extends LitElement {
   // https://lit.dev/docs/components/rendering/
   protected render(): TemplateResult | void {
     if (this.config.show_warning) {
-      return this._showWarning(localize('common.show_warning', '', '', this.config.language));
+      return this._showWarning('Show Warning');
     }
 
     if (this.config.show_error) {
-      return this._showError(localize('common.show_error', '', '', this.config.language));
+      return this._showError('Show Error');
     }
 
     const entityId = this.config.entity;

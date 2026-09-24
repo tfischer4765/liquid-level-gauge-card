@@ -1,8 +1,0 @@
-{
-  "common": {
-    "version": "Verzió",
-    "invalid_configuration": "Érvénytelen konfiguráció",
-    "show_warning": "Figyelmeztetések megjelenítése",
-    "show_error": "Hibák megjelenítése"
-  }
-}

@@ -86,17 +86,10 @@
         ['max_level: "40" (String, wie Editor)', '20/40 -> halb, wie oben', { entity: 'sensor.tank', max_level: '40' }],
         ['max_level: 10 (Wert > max)', 'randvoll', { entity: 'sensor.tank', max_level: 10 }],
         ['secondary_entity', 'zweiter Block Rate 3.5 mm/h', { entity: 'sensor.tank', secondary_entity: 'sensor.flow' }],
-        ['language: de', 'Gesamt / Intensitaet', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'de' }],
-        ['language: cs', 'Uhrn srazek / Intenzita srazek', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'cs' }],
-        ['language: da (NICHT registriert)', 'Fallback en erwartet', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'da' }],
-        ['language: hu (NICHT registriert)', 'Fallback en erwartet', { entity: 'sensor.tank', secondary_entity: 'sensor.flow', language: 'hu' }],
-        ['language: xx (unbekannt)', 'Fallback en erwartet', { entity: 'sensor.tank', language: 'xx' }],
         ['show_warning', 'gelbe Warnung', { entity: 'sensor.tank', show_warning: true }],
         ['show_error', 'rote Fehlerkarte', { entity: 'sensor.tank', show_error: true }],
         ['ohne entity', 'kein Absturz, Wert 0', {}],
         ['entity unavailable', 'kein Absturz, NaN?', { entity: 'sensor.unavailable' }],
-        ['show_warning + language de', 'erwartet "Warnung anzeigen"', { entity: 'sensor.tank', show_warning: true, language: 'de' }],
-        ['show_error + language de', 'erwartet "Fehler anzeigen"', { entity: 'sensor.tank', show_error: true, language: 'de' }],
         ['Entity mit unit_of_measurement %', 'erwartet %, nicht mm', { entity: 'sensor.percent' }],
         ['Entity-State "unknown"', 'kein NaN erwartet', { entity: 'sensor.unknown' }],
         ['negativer Wert', 'leer erwartet', { entity: 'sensor.negative' }],
@@ -245,7 +238,7 @@
         const KNOWN_KEYS = [
           'entity', 'name', 'entity_name', 'max_level', 'aspect_ratio', 'secondary_entity',
           'secondary_entity_name',
-          'fill_colour', 'border_colour', 'language',
+          'fill_colour', 'border_colour',
           'show_warning', 'show_error',
         ];
 

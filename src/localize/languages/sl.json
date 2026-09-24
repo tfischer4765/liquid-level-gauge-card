@@ -1,8 +1,0 @@
-{
-  "common": {
-    "version": "Različica",
-    "invalid_configuration": "Neveljavna konfiguracija",
-    "show_warning": "Prikaži opozorilo",
-    "show_error": "Prikaži napako"
-  }
-}

@@ -145,7 +145,6 @@ entity: sensor.cistern_level
 | entity            | string  | **Required** | The `entity_id` of the main Home Assistant entity whose state you want the card to show.                                                | `none`              |
 | max_level         | number  | **Optional** | Value at which the gauge counts as full, in the entity's own unit        | `100`               |
 | aspect_ratio      | number  | **Optional** | Gauge shape as `aspect_ratio`:width, `1` rendering as a circle … `10` as a slim tube             | `2`                 |
-| language          | string  | **Optional** | The 2 character that determines the language                             | `en`                |
 | entity_name       | string  | **Optional** | Label for `entity`; overrides its `friendly_name`                        | `none`              |
 | secondary_entity  | string  | **Optional** | Second entity to display; shown with its own name and unit, nothing else | `none`              |
 | secondary_entity_name | string | **Optional** | Label for `secondary_entity`; overrides its `friendly_name`          | `none`              |
@@ -239,38 +238,6 @@ max_level: 90
 | haptic          | string | **Optional** | Haptic feedback _success, warning, failure, light, medium, heavy, selection_                                                           | `none`      |
 | repeat          | number | **Optional** | How often to repeat the `hold_action` in milliseconds.                                                                                 | `none`      |
 
-
-### Language
-
-The following languages are supported:
-
-| Language  | Yaml value | Supported | Translated by                                                                       |
-| --------- | ---------- | --------- | ----------------------------------------------------------------------------------- |
-| Czech     | `cs`       | v1.3.1    | [@MiisaTrAnCe](https://github.com/MiisaTrAnCe)                                      |
-| Danish    | `da`       | v1.3.1    | [@Tntdruid](https://github.com/Tntdruid)                                            |
-| Dutch     | `nl`       | v1.3.1    | [@jobvk](https://github.com/jobvk)                                                  |
-| English   | `en`       | v1.0.0    | [@t1gr0u](https://github.com/t1gr0u)                                                |
-| French    | `fr`       | v1.0.0    | [@t1gr0u](https://github.com/t1gr0u)                                                |
-| Italian   | `it`       | v1.4.0    | [@StefanoGiugliano](https://github.com/StefanoGiugliano)                            |
-| German    | `de`       | v1.3.1    | [@AndLindemann](https://github.com/AndLindemann)                                    |
-| Hungarian | `hu`       | v1.3.1    | [@erelke](https://github.com/erelke)                                                |
-| Portuguese| `pt`       | v1.1.0    | [@ViPeR5000](https://github.com/viper5000)                                          |
-| Slovakia  | `sk`       | v1.4.0    | [@milandzuris](https://github.com/milandzuris)                                      |
-| Slovenian | `sl`       | v1.1.0    | [@mnheia](https://github.com/mnheia)                                                |
-| Swedish   | `sv`       | v1.4.0    | [@tangix](https://github.com/tangix)                                                |
-
-> The two value labels are no longer translated at all — they come from each entity's
-> `friendly_name`, which Home Assistant already localises. Only `version`,
-> `invalid_configuration`, `show_warning` and `show_error` remain translatable.
-
-#### How to add a language
-
-If you wish to add a language please follow these steps:
-
-* Go into the `src/localize/languages/` folder
-* Duplicate the `en.json` and name it as the language that you would like to add by following the [2 characters ISO language code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
-* Then modify the `localize.ts` file, located in `src/localize/` to include your language file.
-* Update the `Readme.md`, found in `src/` to include your language and your Github username in the language table.
 
 ## Releasing
 
