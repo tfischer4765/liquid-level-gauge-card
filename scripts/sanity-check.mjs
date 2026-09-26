@@ -107,15 +107,38 @@ if (!filename) {
 }
 
 // --- helpers ----------------------------------------------------------------
-// Numeric per position, so v0.10.0 sorts above v0.9.0 -- which a string compare
-// gets wrong, and which is exactly the mistake worth catching.
+// SemVer precedence. Numeric per position, so v0.10.0 sorts above v0.9.0 --
+// which a string compare gets wrong. And a pre-release sorts below its release
+// and by its own identifiers, so v1.0.0 follows v1.0.0-rc1 and v1.0.0-rc2
+// follows that -- which a compare of the numbers alone gets wrong, since it
+// sees all three as 1.0.0. Build metadata (+...) plays no part.
 function compareVersions(a, b) {
-  const parts = (v) => v.replace(/^v/, '').split('.').map((n) => parseInt(n, 10) || 0);
-  const [x, y] = [parts(a), parts(b)];
+  const parse = (v) => {
+    const [core, ...pre] = v.replace(/^v/, '').split('+')[0].split('-');
+    return {
+      core: core.split('.').map((n) => parseInt(n, 10) || 0),
+      pre: pre.length ? pre.join('-').split('.') : [],
+    };
+  };
+  const [x, y] = [parse(a), parse(b)];
   for (let i = 0; i < 3; i++) {
-    if (x[i] !== y[i]) return x[i] - y[i];
+    if (x.core[i] !== y.core[i]) return x.core[i] - y.core[i];
   }
-  return 0;
+
+  // A release outranks every pre-release of the same version.
+  if (!x.pre.length || !y.pre.length) return y.pre.length - x.pre.length;
+
+  const numeric = /^\d+$/;
+  for (let i = 0; i < Math.min(x.pre.length, y.pre.length); i++) {
+    const [p, q] = [x.pre[i], y.pre[i]];
+    if (p === q) continue;
+    const [pn, qn] = [numeric.test(p), numeric.test(q)];
+    if (pn && qn) return parseInt(p, 10) - parseInt(q, 10);
+    if (pn !== qn) return pn ? -1 : 1; // numeric identifiers sort first
+    return p < q ? -1 : 1;
+  }
+  // All shared identifiers equal: the longer one is greater (rc.1 < rc.1.1).
+  return x.pre.length - y.pre.length;
 }
 
 // Git is only consulted here, and only to find the previous tag. Outside a
