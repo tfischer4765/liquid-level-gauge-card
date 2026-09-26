@@ -323,7 +323,7 @@ node scripts/source-hash.mjs --files   # exactly what goes into it
 ```
 
 It covers `src/`, `tsconfig.json`, `rollup.config.js`, `package.json` and
-`package-lock.json` — 21 files. Documentation, the dev rig and the workflows are
+`package-lock.json`. Documentation, the dev rig and the workflows are
 excluded, since none of them reach the bundle.
 
 Git is deliberately not involved. Uncommitted edits change the hash by themselves, so
@@ -355,7 +355,7 @@ Clone and create a PR to help make the card even better.
 [home-assistant-shield]: https://img.shields.io/badge/Home%20Assistant-visual%20editor/yaml-green?style=flat-square
 [home-assistant-link]: https://www.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/tfischer4765/liquid-level-gauge-card.svg?style=flat-square
-[license-link]: LICENSE.md
+[license-link]: LICENSE
 [activity-shield]: https://img.shields.io/github/commit-activity/y/tfischer4765/liquid-level-gauge-card.svg?style=flat-square
 [activity-link]: https://github.com/tfischer4765/liquid-level-gauge-card/commits/master
 [bugs-shield]: https://img.shields.io/github/issues/tfischer4765/liquid-level-gauge-card/bug?color=red&style=flat-square&label=bugs
